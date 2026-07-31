@@ -49,7 +49,6 @@ export default class DialsDirectory extends HandlebarsApplicationMixin(
           id: dial.id,
           name: anonymous ? "—" : dial.name,
           anonymous,
-          count: `${dial.system.value}/${dial.system.size}`,
           locked: dial.system.locked,
           svg: renderDial(dial, { interactive: false }),
         };

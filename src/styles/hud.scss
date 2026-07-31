@@ -89,10 +89,12 @@
     }
   }
 
+  // A caption under the dial, free to wrap onto as many lines as the name
+  // needs: truncating it would hide the one thing that tells dials apart.
   .sd-hud-label {
     font-size: 10px;
     line-height: 1.2;
-    margin-bottom: 3px;
+    margin-top: 4px;
     text-align: center;
     overflow-wrap: anywhere;
   }

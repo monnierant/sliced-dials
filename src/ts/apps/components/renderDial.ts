@@ -17,7 +17,7 @@ const RADIUS = CENTRE - 1;
 // A mid grey rather than a translucent black or white: the same dial is drawn
 // on a dark HUD and on a light sheet, and either extreme disappears against one
 // of them.
-const EMPTY_FILL = "rgba(145, 145, 145, 0.4)";
+const EMPTY_FILL = "rgba(205, 205, 205, 0.55)";
 const FALLBACK_FILL = "#7a7a7a";
 
 // Dial names and category labels are user input and land in markup.

@@ -74,16 +74,17 @@ export default class DialsHud extends ApplicationV2 {
         // LIMITED means "something is ticking, but not what": the most tense
         // state available, and the one that must never leak a name.
         const anonymous = !dial.testUserPermission(user, "OBSERVER");
-        const label = anonymous
-          ? "&mdash;"
-          : `${dial.name} ${dial.system.value}/${dial.system.size}`;
+        const label = anonymous ? "&mdash;" : dial.name;
 
         const interactive = dial.isOwner && !dial.system.locked && !anonymous;
 
+        // The name sits under the dial: the dial is what the eye goes to, and
+        // a caption reads as a caption. No count - the drawing already says
+        // how full it is, and a number next to it is just noise.
         return (
           `<li class="sd-hud-dial" data-dial-id="${dial.id}">` +
-          `<div class="sd-hud-label">${label}</div>` +
           renderDial(dial, { interactive }) +
+          `<div class="sd-hud-label">${label}</div>` +
           this.#renderPicker(dial) +
           `</li>`
         );
