@@ -1,7 +1,8 @@
 {
   "SLICEDDIALS": {
     "Dial": {
-      "label": "Cadran"
+      "label": "Cadran",
+      "completed": "est complet."
     }
   }
 }

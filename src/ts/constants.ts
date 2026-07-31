@@ -14,3 +14,8 @@ export const dialType: string = `${moduleId}.dial`;
 // the system or the module loads first. `as const` keeps the literal type, which
 // is what Foundry's typings need to accept it as a hook name.
 export const registerHook = "slicedDials.register" as const;
+
+// Fired the moment a dial fills up, before its declared completion behaviour is
+// applied. This is how a system reacts to "the threat landed" without this
+// module ever knowing what that means.
+export const completedHook = "slicedDials.completed" as const;
