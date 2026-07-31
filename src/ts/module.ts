@@ -2,59 +2,46 @@
 // code and not include them in the build output.
 import "../styles/style.scss";
 
-import MySystActorSheet from "./apps/sheets/MySystActorSheet";
-
-import { moduleId, packagePath } from "./constants";
+import { moduleId, registerHook } from "./constants";
 import { range } from "./handlebarsHelpers/range";
 import { concat } from "./handlebarsHelpers/concat";
 import { ternary } from "./handlebarsHelpers/ternary";
 import { partial } from "./handlebarsHelpers/partial";
-import { mySystActorSchema } from "./apps/schemas/MySystActorSchema";
-import MySystActorDataModel from "./apps/datamodels/MySystActorDataModel";
-import MyNpcRoleActorDataModel from "./apps/datamodels/MySystNpcActorDataModel";
-import MySystActor from "./apps/documents/MySystActor";
 
-declare global {
-  interface DocumentClassConfig {
-    Actor: typeof MySystActor;
+// The public API handed to systems. It is intentionally empty for now: every
+// entry added here becomes a contract that Cowboy Bebop and Ghost in the Shell
+// depend on.
+export interface SlicedDialsApi {}
+
+// `HookConfig` is module-scoped in foundry-vtt-types, not global, so a custom
+// hook name is declared by augmenting that module. Without this, Hooks.callAll
+// rejects the name outright - which is the behaviour we want to keep.
+// The empty type-only import is required: without it TypeScript silently
+// declares a brand new ambient module instead of merging into the real one.
+import type {} from "@league-of-foundry-developers/foundry-vtt-types/configuration";
+
+declare module "@league-of-foundry-developers/foundry-vtt-types/configuration" {
+  namespace Hooks {
+    interface HookConfig {
+      "slicedDials.register": (api: SlicedDialsApi) => void;
+    }
   }
-
-      interface DataModelConfig {
-    Actor: {
-      character: typeof MySystActorDataModel;
-      npc: typeof MyNpcRoleActorDataModel;
-    };
-  }
-}
-
-async function preloadTemplates(): Promise<any> {
-  const templatePaths = [
-    `${packagePath}/templates/partials/actor/header.hbs`,
-  ];
-
-  return loadTemplates(templatePaths);
 }
 
 Hooks.once("init", () => {
   console.log(`Initializing ${moduleId}`);
-
-  console.log("mySystActorSchema", mySystActorSchema);
 
   Handlebars.registerHelper("partial", partial);
   Handlebars.registerHelper("range", range);
   Handlebars.registerHelper("concat", concat);
   Handlebars.registerHelper("ternary", ternary);
 
-  Handlebars.registerHelper("divide", function (a: number, b: number) {
-    return a / b;
-  });
+  // The API is published on the module entry as well as handed to the register
+  // hook: the hook is what systems should use, the property is what macros and
+  // the console need.
+  const api: SlicedDialsApi = {};
+  const self = (game as any).modules?.get(moduleId);
+  if (self) self.api = api;
 
-  CONFIG.Actor.dataModels.character = MySystActorDataModel;
-  CONFIG.Actor.dataModels.npc = MyNpcRoleActorDataModel;
-  CONFIG.Actor.documentClass = MySystActor;
-
-  Actors.unregisterSheet("core", ActorSheet);
-  Actors.registerSheet(moduleId, MySystActorSheet, { makeDefault: true });
-
-  preloadTemplates();
+  Hooks.callAll(registerHook, api);
 });

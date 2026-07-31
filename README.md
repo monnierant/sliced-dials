@@ -1,52 +1,62 @@
-# MySyst - Foundry VTT System / Module
+# Sliced Dials
 
-## Purpose
+A Foundry VTT module for progress dials whose segments are individual **slices**.
 
-This template is here to help you bootstrap quickly a foundry vtt **system or module** using `typescript`.
+Existing clock modules track a single number going up. Here every segment is a
+thing in its own right: it carries a **sign** (positive or negative), a
+**category** defined by the game system, and the **user who placed it**. A dial
+always fills to the end - what changes is the composition it ends up with, and
+that composition is what the table reads at completion.
 
-It works thanks to [foundry-vtt-types](https://github.com/League-of-Foundry-Developers/foundry-vtt-type)
+The module is system agnostic. It knows nothing about any particular category:
+game systems register their own, with labels, colours, icons and a validator.
 
-## Install
+## Boundary
 
-## Usage
+This is the line the whole design hangs off:
 
-Go to `system.json`and edit the system `id`
+- **The module owns** the dials (data, permissions, rendering) and the placement
+  interaction. It emits an *intent* when a user wants to place a slice.
+- **The system owns** the economy: where slices come from, what they cost, who
+  may spend them. It arbitrates the intent and calls back into the API.
 
-Replace all ref to `MySyst` by your system name
+Nothing about resources, currencies or dice lives in this module.
 
-## Building a module instead of a system
+## Status
 
-The build, the release archive and the Foundry registry publication all follow
-the same `kind`, which is deduced from the manifest present in `src/`:
+Skeleton. The manifest declares the `sliced-dials.dial` Item subtype and the
+module publishes an (empty) API through the `slicedDials.register` hook.
 
-- `src/system.json` present, no `src/module.json` -> the package is a **system**
-- `src/module.json` present -> the package is a **module**
+Planned, in order: dial data model and API, SVG dial component, anchored HUD,
+sheet partial for systems, completion handling, sidebar tab.
 
-So turning this template into a module takes two steps and no configuration:
+## For system authors
 
-1. Rename `src/system.json` to `src/module.json`.
-2. Point `$schema` at `https://json.schemastore.org/foundryvtt-module-manifest.json`.
+Listen for the register hook rather than reaching for the module directly - it
+fires regardless of whether your system or this module loads first:
 
-Everything else follows: the build writes `dist/module.json`, the release
-uploads `module.json` + `module.zip`, `FOUNDRY_PATH` deployment targets
-`Data/modules/<id>`, and the registry release is announced with the module
-manifest URL.
+```js
+Hooks.on("slicedDials.register", (api) => {
+  // api.registerRuleset({ ... })
+});
+```
 
-Set the `KIND_OF_PROJECT` environment variable (`system` or `module`) only when
-you need to override that detection.
+`game.modules.get("sliced-dials").api` exposes the same object, for macros and
+for the console.
 
-## CI
+## Requirements
 
-You must create a secret in github action `GH_TOKEN` with a personal access token so `semantic-release` will be able to clone your code and make release
+Foundry VTT v13 or later.
 
-- contents: write to be able to publish a GitHub release
-- issues: write to be able to comment on released issues
-- pull-requests: write to be able to comment on released pull requests
+## Build
 
-You must create a secret in github action `FVTT_PUBLISH_TOKEN`with the `package Release Token`from foundry.
+```sh
+npm install
+npm run build     # writes dist/
+npm run watch
+```
 
-(cf [@semantic-release/github](https://github.com/semantic-release/github))
+Set `FOUNDRY_PATH` to have the build deploy itself into `Data/modules/sliced-dials`.
 
-### Manual Deploy your system
-
-[Latest Release](https://github.com/<group-user>/<repo>/releases/latest/download/system.json)
+Releases are cut by `semantic-release` on push to `main`; conventional commit
+messages drive the version number.

@@ -1,20 +1,19 @@
 {
-  "$schema": "https://json.schemastore.org/foundryvtt-system-manifest.json",
-  "id": "foundry-vtt-system-ts-template",
-  "title": "foundry-vtt-system-ts-template",
-  "description": "",
+  "$schema": "https://json.schemastore.org/foundryvtt-module-manifest.json",
+  "id": "sliced-dials",
+  "title": "Sliced Dials",
+  "description": "Progress dials whose segments are individual slices: each slice carries a sign, a category and the user who placed it. Game systems register their own categories and rules; the module owns the dials and the placement interaction.",
   "version": "1.0.0",
   "packs": [],
   "scripts": [],
   "compatibility": {
-    "minimum": "12",
+    "minimum": "13",
     "verified": "14",
     "maximum": "14"
   },
   "documentTypes": {
-    "Actor": {
-      "character": {},
-      "npc": {}
+    "Item": {
+      "dial": {}
     }
   },
   "languages": [

@@ -1,7 +1,7 @@
 {
-  "name": "brigandyne",
-  "version": "1.0.1",
-  "description": "A template project for FoundryVTT modules using Typescript",
+  "name": "sliced-dials",
+  "version": "1.0.0",
+  "description": "FoundryVTT module: progress dials built from signed, categorised slices",
   "license": "MIT",
   "private": true,
   "type": "module",
