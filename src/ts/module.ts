@@ -16,6 +16,7 @@ import { range } from "./handlebarsHelpers/range";
 import { concat } from "./handlebarsHelpers/concat";
 import { ternary } from "./handlebarsHelpers/ternary";
 import { partial } from "./handlebarsHelpers/partial";
+import { debugApi, registerDemoRuleset } from "./debug";
 
 // `HookConfig` is module-scoped in foundry-vtt-types, not global, and reached
 // through the `Hooks` namespace re-exported by `configuration`. Declaring the
@@ -46,7 +47,11 @@ Hooks.once("init", () => {
   // hook: the hook is what systems should use because it is immune to load
   // order, the property is what macros and the console need.
   const self = (game as any).modules?.get(moduleId);
-  if (self) self.api = api;
+  if (self) self.api = { ...api, debug: debugApi };
+
+  // TEMPORARY: without a ruleset nothing can be placed, and no system provides
+  // one yet. Removed when the HUD lands. See debug.ts.
+  registerDemoRuleset();
 
   Hooks.callAll(registerHook, api);
 });
