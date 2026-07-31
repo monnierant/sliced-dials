@@ -1,9 +1,14 @@
 #sliced-dials-hud {
   position: fixed;
-  top: 90px;
-  right: 12px;
+  // Anchored top-left rather than top-right: a wide panel on the right sits on
+  // the sidebar, and the offset clears the scene controls.
+  top: 10px;
+  left: 90px;
   z-index: 60;
-  width: 168px;
+  // Wide by default, so dials line up in a row and the panel reads as a strip
+  // across the top rather than a tower down the side. Drag and resize from
+  // there; whatever the user settles on is what comes back.
+  width: 344px;
   min-width: 96px;
   max-width: 90vw;
   max-height: 70vh;
