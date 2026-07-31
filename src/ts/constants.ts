@@ -19,3 +19,9 @@ export const registerHook = "slicedDials.register" as const;
 // applied. This is how a system reacts to "the threat landed" without this
 // module ever knowing what that means.
 export const completedHook = "slicedDials.completed" as const;
+
+// Fired when a user asks to place a slice on a segment. A system that handles
+// it returns false - the Foundry convention for "I am taking over" - debits its
+// own economy and calls addSlice itself. Left unhandled, the module asks which
+// slice to place, which is interaction rather than economy.
+export const intentHook = "slicedDials.sliceIntent" as const;

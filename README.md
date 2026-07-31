@@ -75,5 +75,24 @@ npm run watch
 
 Set `FOUNDRY_PATH` to have the build deploy itself into `Data/modules/sliced-dials`.
 
+## Checks
+
+```sh
+npm test
+```
+
+Two suites, both running outside Foundry:
+
+- `test:geometry` compiles the dial geometry on its own and checks it. It is
+  pure arithmetic with no Foundry, DOM or module state, which is exactly why it
+  is kept separate.
+- `test:harness` runs the **built bundle** against a minimal stand-in for
+  Foundry and exercises registration, validation, the write path, permissions,
+  completion and the SVG output.
+
+The stand-in is not Foundry. Document persistence, the real DataModel
+machinery, multi-client sync and anything visual are outside what these can
+tell you - those need a world and a pair of eyes.
+
 Releases are cut by `semantic-release` on push to `main`; conventional commit
 messages drive the version number.

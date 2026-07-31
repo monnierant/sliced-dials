@@ -8,6 +8,9 @@
   "scripts": {
     "build": "tsc && vite build",
     "watch": "tsc && vite build --watch",
+    "test": "npm run test:geometry && npm run test:harness",
+    "test:geometry": "tsc src/ts/apps/components/dialGeometry.ts --outDir test/.out --module esnext --moduleResolution bundler --target es2020 --skipLibCheck && node test/geometry.mjs",
+    "test:harness": "npm run build && node test/harness.mjs",
     "publish": "node publish.cjs"
   },
   "devDependencies": {

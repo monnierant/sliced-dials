@@ -17,6 +17,7 @@ import { concat } from "./handlebarsHelpers/concat";
 import { ternary } from "./handlebarsHelpers/ternary";
 import { partial } from "./handlebarsHelpers/partial";
 import { debugApi, registerDemoRuleset } from "./debug";
+import { registerHudHooks } from "./apps/hud/DialsHud";
 
 // `HookConfig` is module-scoped in foundry-vtt-types, not global, and reached
 // through the `Hooks` namespace re-exported by `configuration`. Declaring the
@@ -27,6 +28,7 @@ declare module "@league-of-foundry-developers/foundry-vtt-types/configuration" {
     interface HookConfig {
       "slicedDials.register": (api: SlicedDialsApi) => void;
       "slicedDials.completed": (dial: any, composition: Composition) => void;
+      "slicedDials.sliceIntent": (dial: any, index: number) => boolean | void;
     }
   }
 }
@@ -46,14 +48,20 @@ Hooks.once("init", () => {
   // The API is published on the module entry as well as handed to the register
   // hook: the hook is what systems should use because it is immune to load
   // order, the property is what macros and the console need.
+  // One object, published in both places. Handing the hook a different object
+  // from the one on `module.api` would be two APIs that drift apart.
+  const published = Object.assign(api, { debug: debugApi });
+
   const self = (game as any).modules?.get(moduleId);
-  if (self) self.api = { ...api, debug: debugApi };
+  if (self) self.api = published;
 
   // TEMPORARY: without a ruleset nothing can be placed, and no system provides
-  // one yet. Removed when the HUD lands. See debug.ts.
+  // one yet. See debug.ts.
   registerDemoRuleset();
 
-  Hooks.callAll(registerHook, api);
+  registerHudHooks();
+
+  Hooks.callAll(registerHook, published);
 });
 
 Hooks.once("setup", () => {
