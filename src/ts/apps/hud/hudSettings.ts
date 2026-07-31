@@ -3,7 +3,12 @@ import { moduleId } from "../../constants";
 export interface HudPosition {
   left: number;
   top: number;
+  // Kept with the position because it is the same kind of preference and the
+  // same lifetime; a separate setting would just be a second thing to migrate.
+  width?: number;
 }
+
+export const MIN_WIDTH = 96;
 
 export const SETTING_ENABLED = "hudEnabled";
 export const SETTING_COLLAPSED = "hudCollapsed";
@@ -74,5 +79,8 @@ export function clampToViewport(
       Math.max(position.top, 0),
       Math.max(0, window.innerHeight - Math.min(height, margin))
     ),
+    width: position.width
+      ? Math.min(Math.max(position.width, MIN_WIDTH), window.innerWidth)
+      : undefined,
   };
 }

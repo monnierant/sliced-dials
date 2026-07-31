@@ -14,7 +14,10 @@ const SIZE = 100;
 const CENTRE = SIZE / 2;
 const RADIUS = CENTRE - 1;
 
-const EMPTY_FILL = "rgba(0, 0, 0, 0.15)";
+// A mid grey rather than a translucent black or white: the same dial is drawn
+// on a dark HUD and on a light sheet, and either extreme disappears against one
+// of them.
+const EMPTY_FILL = "rgba(145, 145, 145, 0.4)";
 const FALLBACK_FILL = "#7a7a7a";
 
 // Dial names and category labels are user input and land in markup.
@@ -95,6 +98,10 @@ export function renderDial(dial: any, options: { interactive?: boolean } = {}) {
     `data-dial-id="${dial.id}">` +
     hatchDefs(patternId) +
     wedges +
+    // Drawn last so it rides over every wedge edge: without it, an empty dial
+    // has no outline at all and reads as a smudge rather than as a dial.
+    `<circle class="sd-dial-rim" cx="${CENTRE}" cy="${CENTRE}" r="${RADIUS}" ` +
+    `fill="none"></circle>` +
     `</svg>`
   );
 }

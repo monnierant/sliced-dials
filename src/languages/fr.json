@@ -26,6 +26,12 @@
         "name": "Afficher le panneau des cadrans",
         "hint": "Panneau ancré listant les cadrans que vous pouvez voir. Déplacez-le par sa barre de préhension, repliez-le avec le chevron. Décocher le masque entièrement."
       }
+    },
+    "Sidebar": {
+      "title": "Cadrans",
+      "create": "Créer un cadran",
+      "newDial": "Nouveau cadran",
+      "empty": "Aucun cadran pour l'instant."
     }
   }
 }

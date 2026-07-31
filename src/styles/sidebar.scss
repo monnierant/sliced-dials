@@ -1,0 +1,61 @@
+.sliced-dials-directory {
+  .sd-directory-actions {
+    padding: 4px;
+  }
+
+  .sd-directory-empty {
+    padding: 8px;
+    opacity: 0.7;
+    font-size: 12px;
+  }
+
+  .sd-directory-list {
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .sd-directory-entry {
+    flex: 0 0 auto;
+    width: 78px;
+  }
+
+  .sd-directory-open {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+    padding: 4px;
+    background: rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 6px;
+    cursor: pointer;
+    line-height: 1.2;
+
+    // An anonymised dial is still shown - that is the point - but there is
+    // nothing to open, so it must not look clickable.
+    &:disabled {
+      cursor: default;
+      opacity: 0.75;
+    }
+  }
+
+  .sd-directory-name {
+    font-size: 10px;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+
+  .sd-directory-count {
+    font-size: 10px;
+    opacity: 0.7;
+  }
+
+  .sd-locked .sd-directory-open {
+    opacity: 0.65;
+  }
+}

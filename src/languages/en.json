@@ -26,6 +26,12 @@
         "name": "Show the dials panel",
         "hint": "Anchored panel listing the dials you can see. Drag it by its grip bar, fold it with the chevron. Turning this off hides it entirely."
       }
+    },
+    "Sidebar": {
+      "title": "Dials",
+      "create": "Create dial",
+      "newDial": "New dial",
+      "empty": "No dial yet."
     }
   }
 }

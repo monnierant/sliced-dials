@@ -29,6 +29,8 @@ export default class DialsHud extends ApplicationV2 {
   /** Segment awaiting a choice of slice, if the picker is open. */
   #pending: { dialId: string; index: number } | null = null;
 
+  #observing = false;
+
   static #instance: DialsHud | null = null;
 
   static get instance(): DialsHud {
@@ -142,7 +144,7 @@ export default class DialsHud extends ApplicationV2 {
     const saved = getPosition();
     if (!saved) return;
 
-    const { left, top } = clampToViewport(
+    const { left, top, width } = clampToViewport(
       saved,
       root.offsetWidth,
       root.offsetHeight
@@ -152,6 +154,32 @@ export default class DialsHud extends ApplicationV2 {
     root.style.top = `${top}px`;
     // The default anchoring is right-hand; once dragged, left wins.
     root.style.right = "auto";
+    if (width) root.style.width = `${width}px`;
+  }
+
+  /**
+   * The panel is resized by the browser's own handle, so the width has to be
+   * read back afterwards rather than driven by us. Debounced because a resize
+   * fires continuously and each save is a settings write.
+   */
+  #watchResize(root: HTMLElement): void {
+    let timer = 0;
+
+    const observer = new ResizeObserver(() => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        const box = root.getBoundingClientRect();
+        void setPosition(
+          clampToViewport(
+            { left: box.left, top: box.top, width: box.width },
+            root.offsetWidth,
+            root.offsetHeight
+          )
+        );
+      }, 400);
+    });
+
+    observer.observe(root);
   }
 
   #activateDrag(root: HTMLElement): void {
@@ -196,6 +224,13 @@ export default class DialsHud extends ApplicationV2 {
 
   #activate(root: HTMLElement): void {
     this.#activateDrag(root);
+
+    // Observed once: _replaceHTML runs on every redraw, and a new observer each
+    // time would multiply the settings writes.
+    if (!this.#observing) {
+      this.#observing = true;
+      this.#watchResize(root);
+    }
 
     root
       .querySelector<HTMLButtonElement>(".sd-hud-fold")

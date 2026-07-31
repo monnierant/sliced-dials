@@ -19,6 +19,7 @@ import { partial } from "./handlebarsHelpers/partial";
 import { debugApi, registerDemoRuleset } from "./debug";
 import { registerHudHooks } from "./apps/hud/DialsHud";
 import DialSheet from "./apps/sheets/DialSheet";
+import { registerSidebarTab } from "./apps/sidebar/DialsDirectory";
 import { trimToSize } from "./apps/schemas/dialSchema";
 
 // `HookConfig` is module-scoped in foundry-vtt-types, not global, and reached
@@ -63,6 +64,7 @@ Hooks.once("init", () => {
 
   registerHudHooks();
   registerDialSheet();
+  registerSidebarTab();
 
   Hooks.callAll(registerHook, published);
 });

@@ -1,15 +1,28 @@
 .sd-dial {
   width: 100%;
   height: auto;
-  max-width: 120px;
+  max-width: 96px;
   display: block;
 
   .sd-segment {
     // Segment boundaries are drawn by the stroke rather than by separate
     // divider elements: one geometry, not two that must agree.
-    stroke: rgba(0, 0, 0, 0.55);
-    stroke-width: 0.75;
+    stroke: rgba(0, 0, 0, 0.6);
+    stroke-width: 0.9;
     transition: opacity 120ms ease-out;
+  }
+
+  // An empty segment is the thing a player is being invited to click, so it
+  // has to read as a slot rather than as background.
+  .sd-segment--empty {
+    stroke: rgba(0, 0, 0, 0.45);
+    stroke-dasharray: 2.5 2;
+  }
+
+  .sd-dial-rim {
+    stroke: rgba(0, 0, 0, 0.7);
+    stroke-width: 1.4;
+    pointer-events: none;
   }
 
   // The hatch overlay sits on top of its wedge and must never swallow the
@@ -25,6 +38,11 @@
     &:hover {
       opacity: 0.75;
     }
+  }
+
+  &.sd-dial--interactive .sd-segment--empty:hover {
+    fill: rgba(255, 255, 255, 0.55);
+    opacity: 1;
   }
 
   &.sd-dial--locked {
