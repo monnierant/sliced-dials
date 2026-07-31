@@ -49,11 +49,18 @@ globalThis.foundry = {
 };
 
 const moduleEntry = {};
+const settings = new Map();
 globalThis.game = {
   user: { id: "u-gm", isGM: true },
   users: { get: (id) => ({ name: id === "u-gm" ? "MJ" : "Alice" }) },
   modules: { get: () => moduleEntry },
   i18n: { localize: (k) => k },
+  settings: {
+    register: (scope, key, config) =>
+      settings.set(`${scope}.${key}`, config.default),
+    get: (scope, key) => settings.get(`${scope}.${key}`),
+    set: async (scope, key, value) => settings.set(`${scope}.${key}`, value),
+  },
 };
 globalThis.CONFIG = { Item: { dataModels: {} } };
 globalThis.Handlebars = { registerHelper: () => {} };

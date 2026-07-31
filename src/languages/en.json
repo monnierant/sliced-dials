@@ -3,6 +3,12 @@
     "Dial": {
       "label": "Dial",
       "completed": "is complete."
+    },
+    "Settings": {
+      "hudEnabled": {
+        "name": "Show the dials panel",
+        "hint": "Anchored panel listing the dials you can see. Drag it by its grip bar, fold it with the chevron. Turning this off hides it entirely."
+      }
     }
   }
 }
