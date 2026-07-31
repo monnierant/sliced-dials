@@ -10,6 +10,10 @@ type Dial = any;
 const ok: Verdict = { ok: true };
 const no = (reason: string): Verdict => ({ ok: false, reason });
 
+// Placing a slice is a player action; correcting a dial is not. Anyone may fill
+// a dial they own, but undoing, emptying and locking stay with the GM.
+const isGM = (): boolean => (game as any).user?.isGM === true;
+
 /**
  * The single answer to "may this slice go on this dial?".
  *
@@ -70,9 +74,16 @@ export async function addSlice(
   const verdict = canAddSlice(dial, complete);
   if (!verdict.ok) return verdict;
 
+  // Foundry only lets the owner of a document write to it, and it has no level
+  // between "can write" and "can delete". A player who may place slices on a
+  // dial is therefore its owner, which the GM grants dial by dial.
+  if (!dial.isOwner) return no("You do not have permission on this dial.");
+
   await dial.update({
     "system.slices": [...dial.system.slices, complete],
   });
+
+  await postPlacementMessage(dial, complete);
 
   if (dial.system.isComplete) await onDialComplete(dial);
 
@@ -85,6 +96,7 @@ export async function addSlice(
  */
 export async function removeLastSlice(dial: Dial): Promise<Verdict> {
   if (!dial?.system) return no("This document is not a dial.");
+  if (!isGM()) return no("Only the GM can correct a dial.");
   if (dial.system.locked) return no("This dial is locked.");
   if (dial.system.slices.length === 0) return no("This dial is empty.");
 
@@ -97,12 +109,14 @@ export async function removeLastSlice(dial: Dial): Promise<Verdict> {
 /** Empties the dial without unlocking it. */
 export async function resetDial(dial: Dial): Promise<Verdict> {
   if (!dial?.system) return no("This document is not a dial.");
+  if (!isGM()) return no("Only the GM can correct a dial.");
   await dial.update({ "system.slices": [] });
   return ok;
 }
 
 export async function setLocked(dial: Dial, locked: boolean): Promise<Verdict> {
   if (!dial?.system) return no("This document is not a dial.");
+  if (!isGM()) return no("Only the GM can lock a dial.");
   await dial.update({ "system.locked": locked });
   return ok;
 }
@@ -134,6 +148,20 @@ async function onDialComplete(dial: Dial): Promise<void> {
     case "none":
       break;
   }
+}
+
+// Every placement is announced, so the table sees a dial move without anyone
+// having to watch it. The category label comes from the ruleset when there is
+// one; otherwise the raw key is shown rather than nothing.
+async function postPlacementMessage(dial: Dial, slice: Slice): Promise<void> {
+  const label = getCategory(dial, slice.category)?.label ?? slice.category;
+  const filled = `${dial.system.value}/${dial.system.size}`;
+
+  const content =
+    `<p><strong>${dial.name}</strong> ${slice.sign}1 ${label}</p>` +
+    `<p>${filled}</p>`;
+
+  await ChatMessage.create({ content } as any);
 }
 
 async function postCompletionMessage(

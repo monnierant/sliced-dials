@@ -22,6 +22,23 @@ This is the line the whole design hangs off:
 
 Nothing about resources, currencies or dice lives in this module.
 
+## Permissions
+
+Dials are Foundry documents, so ownership does the work:
+
+- **None** - the dial does not exist for that player. This is the default for a
+  new dial: the GM reveals deliberately.
+- **Limited** - the player sees that something is ticking, not what.
+- **Observer** - the player sees the dial but cannot act on it.
+- **Owner** - the player may place slices on it.
+
+Foundry has no level between "may write" and "may delete", so a player who may
+fill a dial can also rename or delete it. Granting ownership dial by dial is
+what keeps that contained.
+
+Correcting a dial - undoing the last slice, emptying it, locking it - is the
+GM's alone, whoever owns the dial.
+
 ## Status
 
 Skeleton. The manifest declares the `sliced-dials.dial` Item subtype and the
