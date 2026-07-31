@@ -4,6 +4,23 @@
       "label": "Dial",
       "completed": "is complete."
     },
+    "Sheet": {
+      "name": "Name",
+      "size": "Size",
+      "ruleset": "Ruleset",
+      "noRuleset": "Without a ruleset this dial accepts nothing.",
+      "signs": "Accepted signs",
+      "signBoth": "Positive and negative",
+      "signPositive": "Positive only",
+      "signNegative": "Negative only",
+      "categories": "Accepted categories",
+      "onComplete": "Once complete",
+      "onComplete_lock": "Lock",
+      "onComplete_reset": "Reset",
+      "onComplete_none": "Do nothing",
+      "locked": "Locked",
+      "gmNote": "GM note"
+    },
     "Settings": {
       "hudEnabled": {
         "name": "Show the dials panel",

@@ -33,7 +33,17 @@ globalThis.foundry = {
   applications: {
     api: {
       ApplicationV2: class {
-        render() {}
+        render() {
+          /* the panel is never mounted here; only its module must load */
+        }
+      },
+      HandlebarsApplicationMixin: (Base) => class extends Base {},
+    },
+    sheets: {
+      ItemSheetV2: class {
+        render() {
+          /* same: the sheet is browser territory */
+        }
       },
     },
   },
@@ -228,6 +238,19 @@ check(
   (await api.addSlice(notMine, { sign: "+", category: "rock" })).ok,
   false
 );
+
+// --- shrinking a dial -----------------------------------------------------
+// Only categories the "test" ruleset declares: anything else is refused, which
+// is the point of the ruleset.
+const shrunk = makeDial({ size: 6 });
+for (const category of ["rock", "jazz", "rock", "jazz", "rock"])
+  await api.addSlice(shrunk, { sign: "+", category });
+check("five placed on a six", shrunk.system.value, 5);
+
+// The trim itself is checked by test:geometry, which runs the real function
+// rather than a copy of it. What is worth asserting here is that a dial can
+// actually get into the overflowing state the trim exists to fix.
+check("overflow state is reachable", shrunk.system.slices.length > 4, true);
 
 // --- rendering ------------------------------------------------------------
 const drawn = makeDial();

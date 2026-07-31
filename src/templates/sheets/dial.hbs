@@ -1,0 +1,94 @@
+<div class="sd-sheet">
+  <div class="sd-sheet-preview">
+    {{{preview}}}
+    <div class="sd-sheet-count">{{system.value}}/{{system.size}}</div>
+  </div>
+
+  <div class="sd-sheet-fields">
+    <div class="form-group">
+      <label>{{localize "SLICEDDIALS.Sheet.name"}}</label>
+      <input type="text" name="name" value="{{dial.name}}" {{#unless editable}}disabled{{/unless}} />
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "SLICEDDIALS.Sheet.size"}}</label>
+      <select name="size" {{#unless editable}}disabled{{/unless}}>
+        {{#each sizes}}
+        <option value="{{value}}" {{#if selected}}selected{{/if}}>
+          {{value}}{{#if lossy}} &#9888;{{/if}}
+        </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "SLICEDDIALS.Sheet.ruleset"}}</label>
+      <select name="ruleset" {{#unless editable}}disabled{{/unless}}>
+        <option value="">&mdash;</option>
+        {{#each rulesets}}
+        <option value="{{id}}" {{#if selected}}selected{{/if}}>{{id}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    {{#if missingRuleset}}
+    <p class="notification warning">{{localize "SLICEDDIALS.Sheet.noRuleset"}}</p>
+    {{/if}}
+
+    <div class="form-group">
+      <label>{{localize "SLICEDDIALS.Sheet.signs"}}</label>
+      <select name="signChoice" {{#unless editable}}disabled{{/unless}}>
+        <option value="both" {{#if (eq signChoice "both")}}selected{{/if}}>
+          {{localize "SLICEDDIALS.Sheet.signBoth"}}
+        </option>
+        <option value="positive" {{#if (eq signChoice "positive")}}selected{{/if}}>
+          {{localize "SLICEDDIALS.Sheet.signPositive"}}
+        </option>
+        <option value="negative" {{#if (eq signChoice "negative")}}selected{{/if}}>
+          {{localize "SLICEDDIALS.Sheet.signNegative"}}
+        </option>
+      </select>
+    </div>
+
+    {{#if categories.length}}
+    <div class="form-group sd-sheet-categories">
+      <label>{{localize "SLICEDDIALS.Sheet.categories"}}</label>
+      <div class="sd-sheet-boxes">
+        {{#each categories}}
+        <label class="sd-sheet-box" style="border-color: {{color}}">
+          <input type="checkbox" name="cat.{{key}}" {{#if checked}}checked{{/if}}
+            {{#unless ../editable}}disabled{{/unless}} />
+          {{label}}
+        </label>
+        {{/each}}
+      </div>
+    </div>
+    {{/if}}
+
+    <div class="form-group">
+      <label>{{localize "SLICEDDIALS.Sheet.onComplete"}}</label>
+      <select name="onComplete" {{#unless editable}}disabled{{/unless}}>
+        {{#each onCompleteChoices}}
+        <option value="{{value}}" {{#if selected}}selected{{/if}}>
+          {{localize (concat "SLICEDDIALS.Sheet.onComplete_" value)}}
+        </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>
+        <input type="checkbox" name="locked" {{#if system.locked}}checked{{/if}}
+          {{#unless editable}}disabled{{/unless}} />
+        {{localize "SLICEDDIALS.Sheet.locked"}}
+      </label>
+    </div>
+
+    {{#if isGM}}
+    <div class="form-group">
+      <label>{{localize "SLICEDDIALS.Sheet.gmNote"}}</label>
+      <textarea name="gmNote" rows="2">{{system.gmNote}}</textarea>
+    </div>
+    {{/if}}
+  </div>
+</div>

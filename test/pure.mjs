@@ -1,4 +1,5 @@
-import * as g from "./.out/dialGeometry.js";
+import * as g from "./.out/components/dialGeometry.js";
+import { SIZES, trimToSize } from "./.out/schemas/dialSize.js";
 
 let failures = 0;
 const check = (label, actual, expected) => {
@@ -52,6 +53,15 @@ check("ring closes on itself", [lastEnd[1], lastEnd[2]], [firstStart[1], firstSt
 // A single segment is a full circle and cannot be one arc.
 const whole = g.segmentPath(50, 50, 50, 0, 1);
 check("1 segment uses two arcs", (whole.match(/A /g) || []).length, 2);
+
+// --- sizes and trimming ---------------------------------------------------
+check("offered sizes", [...SIZES], [4, 6, 8, 10, 12]);
+
+const five = ["a", "b", "c", "d", "e"];
+check("trim drops the overflow", trimToSize(five, 4), ["a", "b", "c", "d"]);
+check("trim keeps the earliest slices", trimToSize(five, 2), ["a", "b"]);
+check("a fitting dial is untouched", trimToSize(five, 6) === five, true);
+check("an exact fit is untouched", trimToSize(five, 5) === five, true);
 
 console.log(failures === 0 ? "\nALL CHECKS PASSED" : `\n${failures} FAILURE(S)`);
 process.exit(failures === 0 ? 0 : 1);

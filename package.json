@@ -8,8 +8,8 @@
   "scripts": {
     "build": "tsc && vite build",
     "watch": "tsc && vite build --watch",
-    "test": "npm run test:geometry && npm run test:harness",
-    "test:geometry": "tsc src/ts/apps/components/dialGeometry.ts --outDir test/.out --module esnext --moduleResolution bundler --target es2020 --skipLibCheck && node test/geometry.mjs",
+    "test": "npm run test:pure && npm run test:harness",
+    "test:pure": "tsc src/ts/apps/components/dialGeometry.ts src/ts/apps/schemas/dialSize.ts --outDir test/.out --rootDir src/ts/apps --module esnext --moduleResolution bundler --target es2020 --skipLibCheck && node test/pure.mjs",
     "test:harness": "npm run build && node test/harness.mjs",
     "publish": "node publish.cjs"
   },

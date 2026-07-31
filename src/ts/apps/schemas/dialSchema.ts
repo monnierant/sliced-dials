@@ -1,8 +1,9 @@
 // The import = form is what lets the field classes be referenced directly.
 import fields = foundry.data.fields;
 
-export const MIN_SIZE = 2;
-export const MAX_SIZE = 12;
+import { SIZES } from "./dialSize";
+
+export { SIZES, trimToSize } from "./dialSize";
 
 export const sliceSchema = () => ({
   sign: new fields.StringField({
@@ -19,8 +20,7 @@ export const dialSchema = {
   size: new fields.NumberField({
     initial: 4,
     integer: true,
-    min: MIN_SIZE,
-    max: MAX_SIZE,
+    choices: [...SIZES],
     nullable: false,
   }),
 

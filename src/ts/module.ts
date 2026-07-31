@@ -18,6 +18,8 @@ import { ternary } from "./handlebarsHelpers/ternary";
 import { partial } from "./handlebarsHelpers/partial";
 import { debugApi, registerDemoRuleset } from "./debug";
 import { registerHudHooks } from "./apps/hud/DialsHud";
+import DialSheet from "./apps/sheets/DialSheet";
+import { trimToSize } from "./apps/schemas/dialSchema";
 
 // `HookConfig` is module-scoped in foundry-vtt-types, not global, and reached
 // through the `Hooks` namespace re-exported by `configuration`. Declaring the
@@ -60,9 +62,38 @@ Hooks.once("init", () => {
   registerDemoRuleset();
 
   registerHudHooks();
+  registerDialSheet();
 
   Hooks.callAll(registerHook, published);
 });
+
+// Shrinking a dial that already holds slices would leave some placed beyond its
+// edge: stored, undrawable, and still counted. Trimming here catches every
+// path - the sheet, the API, a macro - rather than only the sheet.
+Hooks.on("preUpdateItem", (item: any, changes: any) => {
+  if (item.type !== dialType) return;
+
+  const size = changes?.system?.size;
+  if (size === undefined) return;
+
+  const slices = changes?.system?.slices ?? item.system.slices;
+  const trimmed = trimToSize(slices, size);
+  if (trimmed !== slices) {
+    changes.system ??= {};
+    changes.system.slices = trimmed;
+  }
+});
+
+function registerDialSheet(): void {
+  const collections = (foundry as any).documents?.collections;
+  const items = collections?.Items ?? (globalThis as any).Items;
+
+  items?.registerSheet?.(moduleId, DialSheet, {
+    types: [dialType],
+    makeDefault: true,
+    label: "Sliced Dials",
+  });
+}
 
 Hooks.once("setup", () => {
   // Past this point a rendered dial can no longer find its category definitions

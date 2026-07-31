@@ -4,6 +4,23 @@
       "label": "Cadran",
       "completed": "est complet."
     },
+    "Sheet": {
+      "name": "Nom",
+      "size": "Taille",
+      "ruleset": "Règles",
+      "noRuleset": "Sans règles, ce cadran n'accepte aucune part.",
+      "signs": "Signes acceptés",
+      "signBoth": "Positif et négatif",
+      "signPositive": "Positif seulement",
+      "signNegative": "Négatif seulement",
+      "categories": "Catégories acceptées",
+      "onComplete": "Une fois complet",
+      "onComplete_lock": "Verrouiller",
+      "onComplete_reset": "Remettre à zéro",
+      "onComplete_none": "Ne rien faire",
+      "locked": "Verrouillé",
+      "gmNote": "Note du MJ"
+    },
     "Settings": {
       "hudEnabled": {
         "name": "Afficher le panneau des cadrans",

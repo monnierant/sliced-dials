@@ -1,0 +1,45 @@
+.dial-sheet {
+  .sd-sheet {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .sd-sheet-preview {
+    flex: 0 0 120px;
+    text-align: center;
+  }
+
+  .sd-sheet-count {
+    margin-top: 4px;
+    font-size: 12px;
+    opacity: 0.8;
+  }
+
+  .sd-sheet-fields {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .sd-sheet-boxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .sd-sheet-box {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    padding: 1px 5px;
+    border: 1px solid;
+    border-radius: 3px;
+    white-space: nowrap;
+
+    input {
+      margin: 0;
+      width: auto;
+    }
+  }
+}
