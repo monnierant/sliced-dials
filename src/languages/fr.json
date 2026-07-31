@@ -32,6 +32,10 @@
       "create": "Créer un cadran",
       "newDial": "Nouveau cadran",
       "empty": "Aucun cadran pour l'instant."
+    },
+    "Picker": {
+      "cancel": "Annuler",
+      "noCategories": "Ce cadran n'a aucune catégorie à poser."
     }
   }
 }

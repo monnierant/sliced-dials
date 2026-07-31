@@ -1,8 +1,6 @@
-import { addSlice, canAddSlice } from "../../api";
 import { dialType, intentHook, moduleId } from "../../constants";
-import { getRuleset } from "../../registry";
-import { Sign, Slice } from "../../types";
 import { renderDial } from "../components/renderDial";
+import { openSlicePicker } from "../components/slicePicker";
 import {
   clampToViewport,
   getPosition,
@@ -25,9 +23,6 @@ export default class DialsHud extends ApplicationV2 {
     window: { frame: false, positioned: false },
     actions: {},
   };
-
-  /** Segment awaiting a choice of slice, if the picker is open. */
-  #pending: { dialId: string; index: number } | null = null;
 
   #observing = false;
 
@@ -85,53 +80,12 @@ export default class DialsHud extends ApplicationV2 {
           `<li class="sd-hud-dial" data-dial-id="${dial.id}">` +
           renderDial(dial, { interactive }) +
           `<div class="sd-hud-label">${label}</div>` +
-          this.#renderPicker(dial) +
           `</li>`
         );
       })
       .join("");
 
     return `${header}<ul class="sd-hud-list">${body}</ul>`;
-  }
-
-  #renderPicker(dial: any): string {
-    if (this.#pending?.dialId !== dial.id) return "";
-
-    const ruleset = getRuleset(dial.system.ruleset);
-    const allowed: string[] =
-      dial.system.allowedCategories.length > 0
-        ? dial.system.allowedCategories
-        : Object.keys(ruleset?.categories ?? {});
-
-    if (allowed.length === 0) return "";
-
-    const signs: Sign[] = dial.system.allowedSigns;
-
-    const buttons = signs
-      .flatMap((sign) =>
-        allowed.map((category) => {
-          const label = ruleset?.categories[category]?.label ?? category;
-          const colour = ruleset?.categories[category]?.color ?? "#7a7a7a";
-          // The same predicate that refuses the write decides what is offered,
-          // so nothing can be offered and then rejected.
-          const verdict = canAddSlice(dial, {
-            sign,
-            category,
-            userId: (game as any).user?.id ?? "",
-            at: Date.now(),
-          } as Slice);
-
-          return (
-            `<button type="button" class="sd-pick" data-sign="${sign}" ` +
-            `data-category="${category}" style="border-color:${colour}" ` +
-            `${verdict.ok ? "" : `disabled title="${verdict.reason ?? ""}"`}>` +
-            `${sign}${label}</button>`
-          );
-        })
-      )
-      .join("");
-
-    return `<div class="sd-hud-picker">${buttons}</div>`;
   }
 
   _replaceHTML(result: string, content: HTMLElement): void {
@@ -255,25 +209,7 @@ export default class DialsHud extends ApplicationV2 {
         const proceed = Hooks.call(intentHook, dial, index);
         if (proceed === false) return;
 
-        this.#pending = { dialId: dial.id, index };
-        this.render();
-      });
-    });
-
-    root.querySelectorAll<HTMLButtonElement>(".sd-pick").forEach((button) => {
-      button.addEventListener("click", async () => {
-        const host = button.closest<HTMLElement>(".sd-hud-dial");
-        const dial = (game as any).items?.get(host?.dataset.dialId);
-        if (!dial) return;
-
-        const verdict = await addSlice(dial, {
-          sign: button.dataset.sign as Sign,
-          category: button.dataset.category!,
-        });
-        if (!verdict.ok) ui.notifications?.warn(verdict.reason ?? "Refused");
-
-        this.#pending = null;
-        this.render();
+        void openSlicePicker(dial);
       });
     });
   }

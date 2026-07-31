@@ -1,0 +1,39 @@
+.sd-picker-dialog {
+  .sd-picker {
+    display: grid;
+    // Auto-fit rather than a fixed column count: a ruleset with three
+    // categories and one with twelve both have to lay out sensibly.
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: 6px;
+    padding: 4px 2px;
+    min-width: 260px;
+  }
+
+  .sd-pick {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 8px;
+    // The category colour is the border, not the fill: filled buttons at this
+    // size fight the label for contrast.
+    border: 2px solid;
+    border-radius: 4px;
+    cursor: pointer;
+    line-height: 1.3;
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  .sd-pick-sign {
+    font-weight: bold;
+    font-size: 1.1em;
+  }
+
+  .sd-pick-label {
+    overflow-wrap: anywhere;
+  }
+}

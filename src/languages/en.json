@@ -32,6 +32,10 @@
       "create": "Create dial",
       "newDial": "New dial",
       "empty": "No dial yet."
+    },
+    "Picker": {
+      "cancel": "Cancel",
+      "noCategories": "This dial has no category to place."
     }
   }
 }
