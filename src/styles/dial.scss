@@ -1,0 +1,37 @@
+.sd-dial {
+  width: 100%;
+  height: auto;
+  max-width: 120px;
+  display: block;
+
+  .sd-segment {
+    // Segment boundaries are drawn by the stroke rather than by separate
+    // divider elements: one geometry, not two that must agree.
+    stroke: rgba(0, 0, 0, 0.55);
+    stroke-width: 0.75;
+    transition: opacity 120ms ease-out;
+  }
+
+  // The hatch overlay sits on top of its wedge and must never swallow the
+  // click meant for the segment beneath it.
+  .sd-segment-hatch {
+    pointer-events: none;
+    stroke: none;
+  }
+
+  &.sd-dial--interactive .sd-segment {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.75;
+    }
+  }
+
+  &.sd-dial--locked {
+    opacity: 0.6;
+
+    .sd-segment {
+      cursor: default;
+    }
+  }
+}

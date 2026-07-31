@@ -1,5 +1,9 @@
 import { completedHook } from "./constants";
 import { getRuleset, listRulesets, registerRuleset } from "./registry";
+import {
+  activateDialListeners,
+  renderDial,
+} from "./apps/components/renderDial";
 import { Category, Ruleset, Sign, Slice, Verdict } from "./types";
 
 // A dial is an Item whose subtype this module declares. The typings for
@@ -187,6 +191,10 @@ export interface SlicedDialsApi {
   resetDial: typeof resetDial;
   setLocked: typeof setLocked;
   getCategory: typeof getCategory;
+  // Rendering is part of the contract: systems embed dials in their own sheets
+  // and must not redraw them themselves.
+  renderDial: typeof renderDial;
+  activateDialListeners: typeof activateDialListeners;
 }
 
 export const api: SlicedDialsApi = {
@@ -198,4 +206,6 @@ export const api: SlicedDialsApi = {
   resetDial,
   setLocked,
   getCategory,
+  renderDial,
+  activateDialListeners,
 };
