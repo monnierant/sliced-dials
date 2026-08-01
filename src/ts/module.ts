@@ -12,6 +12,7 @@ import { api, SlicedDialsApi } from "./api";
 import { freezeRegistry } from "./registry";
 import DialDataModel from "./apps/datamodels/DialDataModel";
 import { Composition } from "./apps/datamodels/DialDataModel";
+import { Slice } from "./types";
 import { range } from "./handlebarsHelpers/range";
 import { concat } from "./handlebarsHelpers/concat";
 import { ternary } from "./handlebarsHelpers/ternary";
@@ -32,6 +33,7 @@ declare module "@league-of-foundry-developers/foundry-vtt-types/configuration" {
       "slicedDials.register": (api: SlicedDialsApi) => void;
       "slicedDials.completed": (dial: any, composition: Composition) => void;
       "slicedDials.sliceIntent": (dial: any, index: number) => boolean | void;
+      "slicedDials.slicePlaced": (dial: any, slice: Slice) => void;
     }
   }
 }

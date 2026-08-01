@@ -20,6 +20,11 @@ export const registerHook = "slicedDials.register" as const;
 // module ever knowing what that means.
 export const completedHook = "slicedDials.completed" as const;
 
+// Fired after a slice has actually landed. This is where a system settles up -
+// spending whatever the slice cost - having already refused it through its
+// validator if the cost could not be met.
+export const placedHook = "slicedDials.slicePlaced" as const;
+
 // Fired when a user asks to place a slice on a segment. A system that handles
 // it returns false - the Foundry convention for "I am taking over" - debits its
 // own economy and calls addSlice itself. Left unhandled, the module asks which

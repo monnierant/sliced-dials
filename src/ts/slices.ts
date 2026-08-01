@@ -1,4 +1,4 @@
-import { completedHook } from "./constants";
+import { completedHook, placedHook } from "./constants";
 import { getRuleset } from "./registry";
 import { Category, Sign, Slice, Verdict } from "./types";
 
@@ -82,6 +82,8 @@ export async function addSlice(
   await dial.update({
     "system.slices": [...dial.system.slices, complete],
   });
+
+  Hooks.callAll(placedHook, dial, complete);
 
   await postPlacementMessage(dial, complete);
 
