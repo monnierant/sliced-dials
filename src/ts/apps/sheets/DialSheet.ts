@@ -47,7 +47,9 @@ export default class DialSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
       system,
       isGM: (game as any).user?.isGM === true,
       editable: (this as any).isEditable,
-      preview: renderDial(dial, { interactive: false }),
+      // The sheet only opens to someone allowed to read the dial, so the name
+      // is safe to expose here.
+      preview: renderDial(dial, { interactive: false, label: dial.name }),
       sizes: SIZES.map((size) => ({
         value: size,
         selected: size === system.size,

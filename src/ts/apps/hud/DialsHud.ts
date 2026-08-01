@@ -1,6 +1,9 @@
-import { dialType, intentHook, moduleId } from "../../constants";
-import { renderDial } from "../components/renderDial";
-import { openSlicePicker } from "../components/slicePicker";
+import { dialType, moduleId } from "../../constants";
+import {
+  activateDialList,
+  dialsOf,
+  renderDialList,
+} from "../components/dialList";
 import {
   clampToViewport,
   getPosition,
@@ -33,22 +36,10 @@ export default class DialsHud extends ApplicationV2 {
     return DialsHud.#instance;
   }
 
-  /** World dials this user is allowed to know about at all. */
-  #visibleDials(): any[] {
-    const user = (game as any).user;
-    return ((game as any).items ?? [])
-      .filter(
-        (item: any) =>
-          item.type === dialType && item.testUserPermission(user, "LIMITED")
-      )
-      .sort((a: any, b: any) => a.name.localeCompare(b.name));
-  }
-
   async _renderHTML(): Promise<string> {
-    const user = (game as any).user;
     if (!isHudEnabled()) return "";
 
-    const dials = this.#visibleDials();
+    const dials = dialsOf((game as any).items);
     if (dials.length === 0) return "";
 
     // Folding leaves the grip bar behind rather than everything: a panel that
@@ -64,28 +55,7 @@ export default class DialsHud extends ApplicationV2 {
 
     if (collapsed) return header;
 
-    const body = dials
-      .map((dial: any) => {
-        // LIMITED means "something is ticking, but not what": the most tense
-        // state available, and the one that must never leak a name.
-        const anonymous = !dial.testUserPermission(user, "OBSERVER");
-        const label = anonymous ? "&mdash;" : dial.name;
-
-        const interactive = dial.isOwner && !dial.system.locked && !anonymous;
-
-        // The name sits under the dial: the dial is what the eye goes to, and
-        // a caption reads as a caption. No count - the drawing already says
-        // how full it is, and a number next to it is just noise.
-        return (
-          `<li class="sd-hud-dial" data-dial-id="${dial.id}">` +
-          renderDial(dial, { interactive }) +
-          `<div class="sd-hud-label">${label}</div>` +
-          `</li>`
-        );
-      })
-      .join("");
-
-    return `${header}<ul class="sd-hud-list">${body}</ul>`;
+    return header + renderDialList(dials);
   }
 
   _replaceHTML(result: string, content: HTMLElement): void {
@@ -194,24 +164,7 @@ export default class DialsHud extends ApplicationV2 {
         this.render(true);
       });
 
-    root.querySelectorAll<SVGPathElement>(".sd-segment").forEach((segment) => {
-      segment.addEventListener("click", () => {
-        const host = segment.closest<HTMLElement>(".sd-hud-dial");
-        const dial = (game as any).items?.get(host?.dataset.dialId);
-        if (!dial?.isOwner || dial.system.locked) return;
-
-        const index = Number(segment.dataset.index);
-
-        // A system that handles the intent returns false, the Foundry
-        // convention for "I am taking over": it debits its own economy and
-        // calls addSlice itself. Otherwise the module asks which slice to place
-        // - choosing is interaction, not economy.
-        const proceed = Hooks.call(intentHook, dial, index);
-        if (proceed === false) return;
-
-        void openSlicePicker(dial);
-      });
-    });
+    activateDialList(root);
   }
 }
 

@@ -49,7 +49,23 @@ function hatchDefs(patternId: string): string {
   );
 }
 
-export function renderDial(dial: any, options: { interactive?: boolean } = {}) {
+export interface RenderDialOptions {
+  interactive?: boolean;
+  /**
+   * Accessible name for the drawing. Deliberately NOT defaulted to the dial's
+   * own name: a dial the viewer only holds at LIMITED must not put that name in
+   * the accessibility tree, where it is invisible on screen and read aloud by a
+   * screen reader. Callers that know the viewer may see it pass it in.
+   */
+  label?: string;
+  /**
+   * Suppresses the per-slice tooltips. They name the category and the player
+   * who placed it, which is the same leak as the label by another route.
+   */
+  anonymous?: boolean;
+}
+
+export function renderDial(dial: any, options: RenderDialOptions = {}) {
   const system = dial.system;
   const total: number = system.size;
   const slices: Slice[] = system.slices;
@@ -76,10 +92,14 @@ export function renderDial(dial: any, options: { interactive?: boolean } = {}) {
           ? `<path class="sd-segment-hatch" d="${d}" fill="url(#${patternId})"></path>`
           : "";
 
+      const title = options.anonymous
+        ? ""
+        : `<title>${sliceTitle(dial, slice)}</title>`;
+
       return (
         `<path class="sd-segment sd-segment--filled" d="${d}" ` +
         `fill="${colour}" data-index="${index}">` +
-        `<title>${sliceTitle(dial, slice)}</title></path>${hatch}`
+        `${title}</path>${hatch}`
       );
     })
     .join("");
@@ -92,9 +112,13 @@ export function renderDial(dial: any, options: { interactive?: boolean } = {}) {
     .filter(Boolean)
     .join(" ");
 
+  const ariaLabel = [options.label, `${system.value}/${total}`]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     `<svg class="${classes}" viewBox="0 0 ${SIZE} ${SIZE}" ` +
-    `role="img" aria-label="${escape(dial.name)} ${system.value}/${total}" ` +
+    `role="img" aria-label="${escape(ariaLabel)}" ` +
     `data-dial-id="${dial.id}">` +
     hatchDefs(patternId) +
     wedges +

@@ -160,8 +160,10 @@ function makeDial(overrides = {}) {
   };
   const dial = {
     id: "d1",
-    name: 'Fuite du <convoi>',
+    type: "sliced-dials.dial",
+    name: "Fuite du <convoi>",
     isOwner: true,
+    testUserPermission: () => true,
     _data: data,
     system: new DialModel(data),
     async update(changes) {
@@ -265,9 +267,57 @@ check("category colour used", svg.includes('fill="#f44336"'), true);
 check("negative slice hatched", (svg.match(/sd-segment-hatch/g) || []).length, 1);
 check("positive slice not hatched", (svg.match(/sd-segment-hatch/g) || []).length, 1);
 check("author in the title", svg.includes("+1 Rock - MJ"), true);
-check("dial name escaped", svg.includes("Fuite du &lt;convoi&gt;"), true);
+// Safe by default: the drawing carries no name unless one is handed to it,
+// so no caller can leak a name by forgetting to think about it.
+check("no label means no name", svg.includes("convoi"), false);
+check(
+  "a given label is escaped",
+  api.renderDial(drawn, { label: drawn.name }).includes("Fuite du &lt;convoi&gt;"),
+  true
+);
+check(
+  "anonymous drops the slice tooltips",
+  api.renderDial(drawn, { anonymous: true }).includes("<title>"),
+  false
+);
 check("interactive class applied", svg.includes("sd-dial--interactive"), true);
 check("pattern id scoped to the dial", svg.includes("sd-hatch-d1"), true);
+
+// --- the shared list ------------------------------------------------------
+// One implementation feeds the panel, the sidebar and any system sheet, so the
+// anonymising rule is asserted once and holds in all three.
+const listed = makeDial();
+listed.name = "Convoy";
+await api.addSlice(listed, { sign: "+", category: "rock" });
+
+listed.testUserPermission = (_user, level) => level === "LIMITED";
+const hidden = api.renderDialList([listed]);
+check("LIMITED hides the name", hidden.includes("Convoy"), false);
+check("LIMITED still draws the dial", hidden.includes("sd-segment"), true);
+check("LIMITED is not interactive", hidden.includes("sd-dial--interactive"), false);
+
+listed.testUserPermission = () => true;
+const shown = api.renderDialList([listed]);
+check("OBSERVER shows the name", shown.includes("Convoy"), true);
+check("an owner may act", shown.includes("sd-dial--interactive"), true);
+
+listed.system.locked = true;
+check(
+  "a locked dial is not interactive",
+  api.renderDialList([listed]).includes("sd-dial--interactive"),
+  false
+);
+listed.system.locked = false;
+
+check(
+  "read-only mounting disables interaction",
+  api.renderDialList([listed], { interactive: false }).includes("sd-dial--interactive"),
+  false
+);
+
+// dialsOf reads any collection, which is what lets a system pass an actor.
+const embedded = { items: [listed, { type: "weapon" }] };
+check("dialsOf keeps only dials", api.dialsOf(embedded).length, 1);
 
 console.log(failures === 0 ? "\nALL CHECKS PASSED" : `\n${failures} FAILURE(S)`);
 process.exit(failures === 0 ? 0 : 1);

@@ -1,4 +1,4 @@
-import { addSlice, canAddSlice } from "../../api";
+import { addSlice, canAddSlice } from "../../slices";
 import { getRuleset } from "../../registry";
 import { Sign, Slice, Verdict } from "../../types";
 

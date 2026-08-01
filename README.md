@@ -61,6 +61,42 @@ Hooks.on("slicedDials.register", (api) => {
 `game.modules.get("sliced-dials").api` exposes the same object, for macros and
 for the console.
 
+### Dials on your own sheets
+
+A dial embedded on a document belongs on that document's sheet, and the module
+draws it for you. One call, from wherever your sheet finishes rendering:
+
+```js
+const api = game.modules.get("sliced-dials").api;
+api.mountDials(container, this.actor);
+```
+
+`container` is any element of yours; `mountDials` fills it and wires the whole
+interaction. Pass `{ interactive: false }` for a read-only display.
+
+If your sheet wants to place the pieces itself, the same thing comes apart:
+`api.dialsOf(document)`, `api.renderDialList(dials)`, `api.activateDialList(root)`,
+and `api.renderDial(dial)` for a single one.
+
+### Spending your own resources
+
+Clicking a segment fires `slicedDials.sliceIntent`. Return `false` to take over
+— the module then does nothing, and it is up to you to debit whatever a slice
+costs in your system and call the API:
+
+```js
+Hooks.on("slicedDials.sliceIntent", (dial, index) => {
+  if (!mySystemHandles(dial)) return;      // let the module ask
+  spendFromMyEconomy(dial);
+  api.addSlice(dial, { sign: "+", category: "rock" });
+  return false;                            // handled
+});
+```
+
+Ask `api.canAddSlice(dial, slice)` before offering a choice: it is the same
+predicate the module uses to grey out what cannot be played, so your interface
+and the write path cannot disagree.
+
 ## Requirements
 
 Foundry VTT v13 or later.

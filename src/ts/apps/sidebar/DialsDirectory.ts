@@ -1,5 +1,6 @@
 import { dialType, moduleId, packagePath } from "../../constants";
 import { renderDial } from "../components/renderDial";
+import { dialsOf } from "../components/dialList";
 
 const { HandlebarsApplicationMixin } = (foundry as any).applications.api;
 const sidebar = (foundry as any).applications?.sidebar;
@@ -31,13 +32,7 @@ export default class DialsDirectory extends HandlebarsApplicationMixin(
 
   async _prepareContext(): Promise<any> {
     const user = (game as any).user;
-
-    const dials = ((game as any).items ?? [])
-      .filter(
-        (item: any) =>
-          item.type === dialType && item.testUserPermission(user, "LIMITED")
-      )
-      .sort((a: any, b: any) => a.name.localeCompare(b.name));
+    const dials = dialsOf((game as any).items);
 
     return {
       isGM: user?.isGM === true,
@@ -50,7 +45,11 @@ export default class DialsDirectory extends HandlebarsApplicationMixin(
           name: anonymous ? "—" : dial.name,
           anonymous,
           locked: dial.system.locked,
-          svg: renderDial(dial, { interactive: false }),
+          svg: renderDial(dial, {
+            interactive: false,
+            anonymous,
+            label: anonymous ? undefined : dial.name,
+          }),
         };
       }),
     };
