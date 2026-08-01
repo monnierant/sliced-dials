@@ -41,11 +41,14 @@ GM's alone, whoever owns the dial.
 
 ## Status
 
-Skeleton. The manifest declares the `sliced-dials.dial` Item subtype and the
-module publishes an (empty) API through the `slicedDials.register` hook.
+Working, and driving Cowboy Bebop's objective and threat dials. Dials, the
+ruleset API, the SVG component, the anchored panel, the dial sheet, the sidebar
+tab, completion handling and the integration surface are all in.
 
-Planned, in order: dial data model and API, SVG dial component, anchored HUD,
-sheet partial for systems, completion handling, sidebar tab.
+See **[docs/ROADMAP.md](docs/ROADMAP.md)** for what is left and what has not
+been verified, and **[docs/adr/](docs/adr/)** for the decisions this is built
+on — most were taken against an alternative that still looks reasonable, so
+read them before changing anything load-bearing.
 
 ## For system authors
 
@@ -119,9 +122,9 @@ npm test
 
 Two suites, both running outside Foundry:
 
-- `test:geometry` compiles the dial geometry on its own and checks it. It is
-  pure arithmetic with no Foundry, DOM or module state, which is exactly why it
-  is kept separate.
+- `test:pure` compiles the dial geometry and the size rules on their own and
+  checks them. They are arithmetic with no Foundry, DOM or module state, which
+  is exactly why they are kept separate.
 - `test:harness` runs the **built bundle** against a minimal stand-in for
   Foundry and exercises registration, validation, the write path, permissions,
   completion and the SVG output.

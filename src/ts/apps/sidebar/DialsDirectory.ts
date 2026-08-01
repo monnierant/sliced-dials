@@ -1,6 +1,8 @@
 import { dialType, moduleId, packagePath } from "../../constants";
 import { renderDial } from "../components/renderDial";
 import { dialsOf } from "../components/dialList";
+import { createDial } from "../components/createDial";
+import { isSidebarTabEnabled, registerSidebarSettings } from "./sidebarSettings";
 
 const { HandlebarsApplicationMixin } = (foundry as any).applications.api;
 const sidebar = (foundry as any).applications?.sidebar;
@@ -56,11 +58,7 @@ export default class DialsDirectory extends HandlebarsApplicationMixin(
   }
 
   static async #onCreate(): Promise<void> {
-    const dial = await (Item as any).create({
-      name: (game as any).i18n?.localize("SLICEDDIALS.Sidebar.newDial") ?? "Dial",
-      type: dialType,
-    });
-    dial?.sheet?.render(true);
+    await createDial();
   }
 
   static #onOpen(_event: Event, target: HTMLElement): void {
@@ -70,6 +68,12 @@ export default class DialsDirectory extends HandlebarsApplicationMixin(
 }
 
 export function registerSidebarTab(): void {
+  registerSidebarSettings();
+
+  // Dials live in the combat tracker as well; a table that only ever uses them
+  // there can have the sidebar space back.
+  if (!isSidebarTabEnabled()) return;
+
   const Sidebar = sidebar?.Sidebar;
 
   // Registering a sidebar tab is not a documented extension point, so this
