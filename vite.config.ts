@@ -117,7 +117,11 @@ function conditionalCopyPlugin(kind: string = "module"): Plugin {
   console.log(`kind: ${kind}`);
   return {
     name: "conditional-copy-plugin",
-    async writeBundle(): Promise<void> {
+    // `closeBundle`, not `writeBundle`: Rollup runs `writeBundle` hooks in
+    // parallel, so copying `dist` from there could start before the templates,
+    // the languages or the packs had finished landing in it. `closeBundle` runs
+    // once every one of them is done.
+    async closeBundle(): Promise<void> {
       if (!foundryPath) {
         console.log(
           "FOUNDRY_PATH is not defined -> Skip internal test release."
