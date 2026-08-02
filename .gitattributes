@@ -1,1 +1,28 @@
+# Le dépôt stocke du LF, quelle que soit la machine qui écrit.
+#
+# Sans cette règle, un éditeur ou une synchronisation qui réécrit un fichier en
+# CRLF le fait apparaître entièrement modifié dans `git status`, sans qu'un seul
+# caractère de contenu ait bougé. Le bruit noie alors le vrai travail.
+* text=auto eol=lf
+
+# Ce qui n'est pas du texte ne doit jamais être converti : une police ou une
+# image dont on remplacerait les octets 0x0D serait corrompue.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+*.mp3 binary
+*.ogg binary
+*.webm binary
+*.mp4 binary
+*.pdf binary
+*.zip binary
+
 yarn.lock linguist-generated
