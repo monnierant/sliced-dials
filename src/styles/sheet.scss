@@ -8,6 +8,10 @@
   .sd-sheet-preview {
     flex: 0 0 120px;
     text-align: center;
+    // Dragged tall, the fields scroll and the dial stays in view: it is what
+    // every one of these fields is describing.
+    position: sticky;
+    top: 0;
   }
 
   .sd-sheet-count {
@@ -16,15 +20,92 @@
     opacity: 0.8;
   }
 
+  .sd-sheet-undo {
+    width: 100%;
+    margin-top: 8px;
+    font-size: 11px;
+    white-space: normal;
+  }
+
+  // Extra width goes into a second column of fields rather than into stretching
+  // ten selects across the window. Below the breakpoint it collapses back to
+  // one column on its own, which is what a narrow drag has to keep working.
   .sd-sheet-fields {
     flex: 1 1 auto;
     min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 8px 12px;
+    align-content: start;
+  }
+
+  // The wide ones: a row of category boxes, the two sign controls sharing a
+  // line and the note all read badly squeezed into a half-width column.
+  .sd-sheet-categories,
+  .sd-sheet-signs,
+  .form-group:has(textarea) {
+    grid-column: 1 / -1;
+  }
+
+  .form-group {
+    min-width: 0;
+
+    // Foundry gives labels a proportional share of the row. In a two-column
+    // sheet that made the longer French labels wrap onto two or three lines
+    // while the select beside them still had spare room. Let the label take
+    // its natural width and give the remaining space to the control.
+    > label:first-child {
+      flex: 0 0 auto;
+      white-space: nowrap;
+      margin-right: 8px;
+    }
+
+    > input,
+    > select,
+    > textarea {
+      min-width: 0;
+    }
+  }
+
+  // The hints are read once and then only get in the way, so they live in the
+  // label's tooltip. The mark is what says a tooltip is there to ask for.
+  .sd-sheet-hint {
+    font-size: 10px;
+    margin-left: 3px;
+    opacity: 0.6;
+    cursor: help;
   }
 
   .sd-sheet-boxes {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
+  }
+
+  .sd-sheet-sign-controls {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+
+    select {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+  }
+
+  .sd-sheet-locked {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin: 0;
+    white-space: nowrap;
+
+    input {
+      width: auto;
+      margin: 0;
+    }
   }
 
   .sd-sheet-box {

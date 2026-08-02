@@ -1,0 +1,44 @@
+// The dial standing in for a dial item's thumbnail in the item directory. The
+// frame inherits the classes core sized the `img` with, so it is already the
+// right box; only the drawing inside it has to be told to fill that box.
+.sd-directory-thumb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  // Core sizes the thumbnail through rules written against `img`, which a span
+  // does not match however many of its classes it carries. The one square a
+  // directory row is built around has to be restated here, from the same
+  // variable core measures it with.
+  flex: 0 0 var(--sidebar-item-height, 32px);
+  width: var(--sidebar-item-height, 32px);
+  height: var(--sidebar-item-height, 32px);
+
+  // The box stays the size of every other thumbnail so the column of names
+  // still lines up; the padding takes the difference off the dial alone, which
+  // is round and would otherwise touch the row above and below.
+  box-sizing: border-box;
+  padding: 3px;
+
+  .sd-dial {
+    width: 100%;
+    height: 100%;
+    // Directory rows are short, and the shared 96px cap would let the dial
+    // spill past the row it belongs to.
+    max-width: none;
+  }
+}
+
+// The GM's two state toggles, pushed to the far end of the row so they line up
+// down the list instead of drifting with the length of each name.
+.sd-directory-controls {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  // Names in this list can be long, and a row that overflows must lose the
+  // name rather than the buttons.
+  padding-left: 4px;
+}

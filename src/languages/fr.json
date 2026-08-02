@@ -1,41 +1,117 @@
 {
+  "TYPES.Item.sliced-dials.dial": "Cadran",
   "SLICEDDIALS": {
     "Dial": {
       "label": "Cadran",
-      "completed": "est complet."
+      "completed": "est complet.",
+      "closedBy": "Clôturé par {category}",
+      "tone_neutral": "",
+      "tone_positive": "Objectif",
+      "tone_negative": "Menace"
     },
     "Sheet": {
+      "title": "Cadrans",
       "name": "Nom",
       "size": "Taille",
       "ruleset": "Règles",
       "noRuleset": "Sans règles, ce cadran n'accepte aucune part.",
+      "tone": "Nature",
+      "toneHint": "Ce qu'est ce cadran, rendu par la couleur de son contour. Cela n'impose aucune règle : une menace peut très bien accepter des parts positives, c'est ce que décident les signes acceptés ci-dessous.",
+      "tone_neutral": "Ni l'un ni l'autre",
+      "tone_positive": "Objectif",
+      "tone_negative": "Menace",
       "signs": "Signes acceptés",
       "signBoth": "Positif et négatif",
       "signPositive": "Positif seulement",
       "signNegative": "Négatif seulement",
       "categories": "Catégories acceptées",
+      "closingCategory": "Clôturé par",
+      "closingAny": "N'importe quelle catégorie",
+      "closingHint": "Le dernier segment n'accepte rien d'autre. Un cadran que personne ne peut clôturer ainsi reste à une part de la fin.",
       "onComplete": "Une fois complet",
       "onComplete_lock": "Verrouiller",
       "onComplete_reset": "Remettre à zéro",
       "onComplete_none": "Ne rien faire",
       "locked": "Verrouillé",
-      "gmNote": "Note du MJ"
+      "gmNote": "Note du MJ",
+      "state": "État",
+      "stateHint": "Préparé et Caché retirent tous les deux la permission de chaque joueur : le cadran cesse d'atteindre leur client. Le remettre en jeu restaure exactement ce que vous aviez accordé.",
+      "state_inactive": "Préparé",
+      "state_hidden": "Caché",
+      "state_active": "En jeu",
+      "celebration": "Et montrer",
+      "celebration_discreet": "Une lueur sur le cadran",
+      "celebration_modal": "Une fenêtre, pour tout le monde",
+      "celebration_none": "Rien",
+      "onCompleteState": "Puis",
+      "onCompleteState_keep": "Le laisser où il est",
+      "onCompleteState_hidden": "En caché",
+      "onCompleteState_inactive": "En préparé",
+      "removeLastSlice": "Retirer la dernière part"
     },
     "Settings": {
       "hudEnabled": {
         "name": "Afficher le panneau des cadrans",
         "hint": "Panneau ancré listant les cadrans que vous pouvez voir. Déplacez-le par sa barre de préhension, repliez-le avec le chevron. Décocher le masque entièrement."
+      },
+      "trackerMode": {
+        "name": "Suivi de combat",
+        "hint": "Soit les cadrans partagent le suivi avec le combat, en second onglet, soit ils le prennent entièrement — pour une table qui ne lance jamais l'initiative."
+      },
+      "trackerMode_tabs": "Combat et cadrans",
+      "trackerMode_dialsOnly": "Cadrans seuls",
+      "defaultSize": {
+        "name": "Nouveau cadran : taille",
+        "hint": "En combien de segments un cadran fraîchement créé est divisé."
+      },
+      "defaultRuleset": {
+        "name": "Nouveau cadran : règles",
+        "hint": "Les catégories de quel système un cadran fraîchement créé utilise. Sans règles, il n'accepte rien."
+      },
+      "defaultState": {
+        "name": "Nouveau cadran : état",
+        "hint": "Préparé tient un nouveau cadran hors jeu, et hors des clients des joueurs, jusqu'à ce que vous l'y meniez."
+      },
+      "defaultOnComplete": {
+        "name": "Nouveau cadran : une fois complet",
+        "hint": "Ce qu'un cadran fraîchement créé fait de ses parts quand il se remplit."
+      },
+      "defaultCelebration": {
+        "name": "Nouveau cadran : célébration",
+        "hint": "Avec quel éclat un cadran fraîchement créé se conclut."
       }
+    },
+    "Hud": {
+      "drag": "Déplacer le panneau",
+      "fold": "Replier le panneau",
+      "close": "Masquer le panneau (réactivable dans les réglages du module)"
+    },
+    "Combat": {
+      "encounter": "Combat",
+      "dials": "Cadrans",
+      "open": "Ouvrir dans une fenêtre",
+      "showAll": "Montrer à tous"
     },
     "Sidebar": {
       "title": "Cadrans",
       "create": "Créer un cadran",
       "newDial": "Nouveau cadran",
-      "empty": "Aucun cadran pour l'instant."
+      "empty": "Aucun cadran pour l'instant.",
+      "reveal": "Montrer aux joueurs",
+      "conceal": "Cacher aux joueurs",
+      "activate": "Mettre en jeu",
+      "deactivate": "Retirer du jeu",
+      "edit": "Modifier le cadran"
     },
     "Picker": {
-      "cancel": "Annuler",
+      "close": "Fermer",
       "noCategories": "Ce cadran n'a aucune catégorie à poser."
+    },
+    "Celebration": {
+      "title": "Cadrans",
+      "completed": "Complet",
+      "composition": "{positive} positives, {negative} négatives",
+      "close": "Fermer"
     }
   }
 }

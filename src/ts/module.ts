@@ -20,7 +20,12 @@ import { partial } from "./handlebarsHelpers/partial";
 import { debugApi, registerDemoRuleset } from "./debug";
 import { registerHudHooks } from "./apps/hud/DialsHud";
 import DialSheet from "./apps/sheets/DialSheet";
-import { registerSidebarTab } from "./apps/sidebar/DialsDirectory";
+import { registerCombatTrackerTab } from "./apps/combat/combatDials";
+import { registerDialDefaults } from "./apps/settings/dialDefaults";
+import { registerPopup } from "./apps/DialsPopup";
+import { registerCelebration } from "./apps/celebration";
+import { registerSocket } from "./apps/sockets";
+import { registerDirectoryThumbs } from "./apps/sidebar/directoryThumbs";
 import { trimToSize } from "./apps/schemas/dialSchema";
 
 // `HookConfig` is module-scoped in foundry-vtt-types, not global, and reached
@@ -34,6 +39,7 @@ declare module "@league-of-foundry-developers/foundry-vtt-types/configuration" {
       "slicedDials.completed": (dial: any, composition: Composition) => void;
       "slicedDials.sliceIntent": (dial: any, index: number) => boolean | void;
       "slicedDials.slicePlaced": (dial: any, slice: Slice) => void;
+      "slicedDials.filterCombatDial": (dial: any) => boolean | void;
     }
   }
 }
@@ -49,6 +55,11 @@ Hooks.once("init", () => {
   // Foundry namespaces subtypes provided by a module, so the key is
   // `sliced-dials.dial` rather than the bare word.
   (CONFIG.Item.dataModels as any)[dialType] = DialDataModel;
+  // Do not rely solely on Foundry deriving TYPES.Item.sliced-dials.dial here.
+  // An explicit label also works when a client still has the package's older
+  // language catalogue cached, because Dial.label predates the subtype UI.
+  (CONFIG.Item as any).typeLabels ??= {};
+  (CONFIG.Item as any).typeLabels[dialType] = "SLICEDDIALS.Dial.label";
 
   // The API is published on the module entry as well as handed to the register
   // hook: the hook is what systems should use because it is immune to load
@@ -66,7 +77,10 @@ Hooks.once("init", () => {
 
   registerHudHooks();
   registerDialSheet();
-  registerSidebarTab();
+  registerCombatTrackerTab();
+  registerPopup();
+  registerCelebration();
+  registerDirectoryThumbs();
 
   Hooks.callAll(registerHook, published);
 });
@@ -95,12 +109,22 @@ function registerDialSheet(): void {
   items?.registerSheet?.(moduleId, DialSheet, {
     types: [dialType],
     makeDefault: true,
-    label: "Sliced Dials",
+    label: "SLICEDDIALS.Dial.label",
   });
 }
 
 Hooks.once("setup", () => {
+  // Ordered on purpose: the defaults offer a dropdown of registered rulesets,
+  // so they must be built while the registry is complete and before it is shut.
+  registerDialDefaults();
+
   // Past this point a rendered dial can no longer find its category definitions
   // gone, so nothing has to be invalidated mid-session.
   freezeRegistry();
+});
+
+Hooks.once("ready", () => {
+  // `game.socket` does not exist before this. The handlers themselves were
+  // collected at init; this is only the wire being plugged in.
+  registerSocket();
 });

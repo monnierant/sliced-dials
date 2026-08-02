@@ -18,6 +18,7 @@ class ArrayField extends Field {
   }
 }
 class SchemaField extends Field {}
+class ObjectField extends Field {}
 
 globalThis.foundry = {
   abstract: {
@@ -54,6 +55,7 @@ globalThis.foundry = {
       BooleanField: Field,
       ArrayField,
       SchemaField,
+      ObjectField,
     },
   },
 };
@@ -73,6 +75,13 @@ globalThis.game = {
   },
 };
 globalThis.CONFIG = { Item: { dataModels: {} } };
+
+// Completing a dial now reaches for the DOM to celebrate it. There is no
+// browser here and there is nothing rendered to find, so a stub that answers
+// "nothing" is exactly right: what the celebration draws is outside what this
+// can check, and it must not take the write path down with it.
+globalThis.document = { querySelectorAll: () => [] };
+globalThis.window = { setTimeout: (fn, ms) => setTimeout(fn, ms) };
 globalThis.Handlebars = { registerHelper: () => {} };
 globalThis.ChatMessage = {
   create: async (data) => {
@@ -116,6 +125,11 @@ check(
   typeof CONFIG.Item.dataModels["sliced-dials.dial"],
   "function"
 );
+check(
+  "Item subtype has an explicit translation key",
+  CONFIG.Item.typeLabels?.["sliced-dials.dial"],
+  "SLICEDDIALS.Dial.label"
+);
 
 const api = moduleEntry.api;
 const DialModel = CONFIG.Item.dataModels["sliced-dials.dial"];
@@ -147,6 +161,9 @@ check("late registration refused", lateError !== null, true);
 
 // --- a dial ---------------------------------------------------------------
 function makeDial(overrides = {}) {
+  // Ownership lives on the document, not in the system data, and Foundry
+  // merges it on update rather than replacing it. Both matter to the states.
+  const { ownership = {}, ...systemOverrides } = overrides;
   const data = {
     size: 4,
     slices: [],
@@ -154,21 +171,27 @@ function makeDial(overrides = {}) {
     allowedCategories: [],
     allowedSigns: ["+", "-"],
     onComplete: "lock",
+    onCompleteState: "keep",
+    celebration: "discreet",
+    state: "active",
+    revealedOwnership: {},
     locked: false,
     gmNote: "",
-    ...overrides,
+    ...systemOverrides,
   };
   const dial = {
     id: "d1",
     type: "sliced-dials.dial",
     name: "Fuite du <convoi>",
     isOwner: true,
+    ownership: { ...ownership },
     testUserPermission: () => true,
     _data: data,
     system: new DialModel(data),
     async update(changes) {
       for (const [key, value] of Object.entries(changes)) {
-        dial._data[key.replace("system.", "")] = value;
+        if (key === "ownership") dial.ownership = { ...dial.ownership, ...value };
+        else dial._data[key.replace("system.", "")] = value;
       }
       dial.system = new DialModel(dial._data);
     },
@@ -199,6 +222,34 @@ check(
   false
 );
 
+// --- the closing category -------------------------------------------------
+const placed = [{ sign: "+", category: "rock", userId: "u1", at: 0 }];
+
+// One slice on a two-segment dial: the next one closes it.
+const closing = makeDial({
+  size: 2,
+  slices: placed,
+  closingCategory: "jazz",
+});
+check(
+  "closing category refuses another at the last segment",
+  api.canAddSlice(closing, { sign: "+", category: "rock", userId: "u1", at: 0 }).ok,
+  false
+);
+check(
+  "closing category accepts its own at the last segment",
+  api.canAddSlice(closing, { sign: "+", category: "jazz", userId: "u1", at: 0 }).ok,
+  true
+);
+
+// Same requirement, two segments left: it must not bite yet.
+const notYet = makeDial({ size: 3, slices: placed, closingCategory: "jazz" });
+check(
+  "closing category ignored before the last segment",
+  api.canAddSlice(notYet, { sign: "+", category: "rock", userId: "u1", at: 0 }).ok,
+  true
+);
+
 // --- the write path -------------------------------------------------------
 await api.addSlice(dial, { sign: "+", category: "rock" });
 check("one slice placed", dial.system.value, 1);
@@ -217,8 +268,11 @@ await api.addSlice(dial, { sign: "+", category: "jazz" });
 check("dial complete", dial.system.isComplete, true);
 check("locked by onComplete", dial.system.locked, true);
 check("completion announced", chat.length, 5);
+check("GM can correct an auto-locked dial", (await api.removeLastSlice(dial)).ok, true);
+check("correction keeps the dial locked", dial.system.locked, true);
+check("correction removed the last slice", dial.system.value, 3);
 check(
-  "full dial refuses more",
+  "locked dial refuses more",
   api.canAddSlice(dial, { sign: "+", category: "rock", userId: "u1", at: 0 }).ok,
   false
 );
@@ -318,6 +372,103 @@ check(
 // dialsOf reads any collection, which is what lets a system pass an actor.
 const embedded = { items: [listed, { type: "weapon" }] };
 check("dialsOf keeps only dials", api.dialsOf(embedded).length, 1);
+
+// --- states ---------------------------------------------------------------
+// The state decides which surfaces a dial reaches; ownership, checked above,
+// decides how much of it a viewer gets. Both have to pass.
+const states = {
+  items: [
+    makeDial({ state: "active" }),
+    makeDial({ state: "hidden" }),
+    makeDial({ state: "inactive" }),
+  ],
+};
+
+check("in play, the GM sees the hidden one too", api.dialsOf(states).length, 2);
+check("the directory sees every state", api.dialsOf(states, { states: "all" }).length, 3);
+
+game.user.isGM = false;
+check("a player sees neither hidden nor prepared", api.dialsOf(states).length, 1);
+game.user.isGM = true;
+
+// Concealing is enforced through ownership, not merely drawn: the document has
+// to stop reaching a player's client at all.
+const secret = makeDial({
+  state: "active",
+  ownership: { default: 0, "u-alice": 3 },
+});
+
+await api.setState(secret, "hidden");
+check("concealing drops every granted level", secret.ownership, {
+  default: 0,
+  "u-alice": 0,
+});
+check(
+  "what was granted is kept aside",
+  secret.system.revealedOwnership,
+  { default: 0, "u-alice": 3 }
+);
+
+// Prepared is just as concealed, and must not overwrite the backup with the
+// stripped map it now reads.
+await api.setState(secret, "inactive");
+check(
+  "hiding twice keeps the first backup",
+  secret.system.revealedOwnership,
+  { default: 0, "u-alice": 3 }
+);
+
+await api.setState(secret, "active");
+check("revealing puts back exactly what was granted", secret.ownership, {
+  default: 0,
+  "u-alice": 3,
+});
+check("nothing is kept aside once in play", secret.system.revealedOwnership, {});
+
+// Completion is executed by whoever placed the final slice. A player-owned
+// dial must still be able to carry out the state consequence its GM configured
+// beforehand; this private consequence is distinct from the GM-only API.
+const completingPlayerDial = makeDial({
+  size: 1,
+  onComplete: "none",
+  onCompleteState: "hidden",
+  ownership: { default: 2 },
+});
+game.user.isGM = false;
+await api.addSlice(completingPlayerDial, { sign: "+", category: "rock" });
+await new Promise((resolve) => setTimeout(resolve, 2500));
+check(
+  "player completion applies its declared state",
+  completingPlayerDial.system.state,
+  "hidden"
+);
+check(
+  "player completion conceals ownership",
+  completingPlayerDial.ownership.default,
+  0
+);
+game.user.isGM = true;
+
+// A dial that has never been revealed has nothing to put back, and "in play"
+// has to mean somebody can see it.
+const fresh = makeDial({ state: "inactive", ownership: { default: 0 } });
+await api.setState(fresh, "active");
+check("a first reveal gives the table Observer", fresh.ownership.default, 2);
+
+// Unless the GM has already named who this dial is for.
+const named = makeDial({ state: "inactive", ownership: { "u-alice": 3 } });
+await api.setState(named, "active");
+check("a named player is not widened to the table", named.ownership, {
+  "u-alice": 3,
+});
+
+game.user.isGM = false;
+check(
+  "a player cannot change a state",
+  (await api.setState(fresh, "hidden")).ok,
+  false
+);
+game.user.isGM = true;
 
 console.log(failures === 0 ? "\nALL CHECKS PASSED" : `\n${failures} FAILURE(S)`);
 process.exit(failures === 0 ? 0 : 1);

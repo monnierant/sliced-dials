@@ -47,6 +47,14 @@ export function registerHudSettings(): void {
 export const isHudEnabled = (): boolean =>
   (game as any).settings?.get(moduleId, SETTING_ENABLED) !== false;
 
+/**
+ * Closing the panel is the same act as unticking the setting, and deliberately
+ * so: there is no window manager behind a frameless panel to reopen it, so the
+ * one switch that governs it has to be the one the cross throws.
+ */
+export const setHudEnabled = (value: boolean): Promise<unknown> =>
+  (game as any).settings.set(moduleId, SETTING_ENABLED, value);
+
 export const isCollapsed = (): boolean =>
   (game as any).settings?.get(moduleId, SETTING_COLLAPSED) === true;
 

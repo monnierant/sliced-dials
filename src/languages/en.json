@@ -1,41 +1,117 @@
 {
+  "TYPES.Item.sliced-dials.dial": "Dial",
   "SLICEDDIALS": {
     "Dial": {
       "label": "Dial",
-      "completed": "is complete."
+      "completed": "is complete.",
+      "closedBy": "Closed by {category}",
+      "tone_neutral": "",
+      "tone_positive": "Objective",
+      "tone_negative": "Threat"
     },
     "Sheet": {
+      "title": "Dials",
       "name": "Name",
       "size": "Size",
       "ruleset": "Ruleset",
       "noRuleset": "Without a ruleset this dial accepts nothing.",
+      "tone": "Kind",
+      "toneHint": "What this dial is, drawn as the colour of its rim. It attaches no rule: a threat may still take positive slices, which is what the accepted signs below decide.",
+      "tone_neutral": "Neither",
+      "tone_positive": "Objective",
+      "tone_negative": "Threat",
       "signs": "Accepted signs",
       "signBoth": "Positive and negative",
       "signPositive": "Positive only",
       "signNegative": "Negative only",
       "categories": "Accepted categories",
+      "closingCategory": "Closed by",
+      "closingAny": "Any category",
+      "closingHint": "The last segment accepts nothing else. A dial nobody can close with it stays one short.",
       "onComplete": "Once complete",
       "onComplete_lock": "Lock",
       "onComplete_reset": "Reset",
       "onComplete_none": "Do nothing",
       "locked": "Locked",
-      "gmNote": "GM note"
+      "gmNote": "GM note",
+      "state": "State",
+      "stateHint": "Prepared and Hidden both drop every player's permission, so the dial stops reaching their client at all. Bringing it back into play restores exactly what you had granted.",
+      "state_inactive": "Prepared",
+      "state_hidden": "Hidden",
+      "state_active": "In play",
+      "celebration": "And show",
+      "celebration_discreet": "A glow on the dial",
+      "celebration_modal": "A window, for everyone",
+      "celebration_none": "Nothing",
+      "onCompleteState": "Then",
+      "onCompleteState_keep": "Leave it where it is",
+      "onCompleteState_hidden": "Back to hidden",
+      "onCompleteState_inactive": "Back to prepared",
+      "removeLastSlice": "Remove last slice"
     },
     "Settings": {
       "hudEnabled": {
         "name": "Show the dials panel",
         "hint": "Anchored panel listing the dials you can see. Drag it by its grip bar, fold it with the chevron. Turning this off hides it entirely."
+      },
+      "trackerMode": {
+        "name": "Combat tracker",
+        "hint": "Either dials share the tracker with the encounter, as a second tab, or they take it over entirely — for a table that never rolls initiative."
+      },
+      "trackerMode_tabs": "Encounter and dials",
+      "trackerMode_dialsOnly": "Dials only",
+      "defaultSize": {
+        "name": "New dial: size",
+        "hint": "How many segments a freshly created dial is divided into."
+      },
+      "defaultRuleset": {
+        "name": "New dial: ruleset",
+        "hint": "Which system's categories a freshly created dial plays by. Without one it accepts nothing."
+      },
+      "defaultState": {
+        "name": "New dial: state",
+        "hint": "Prepared keeps a new dial out of play, and out of the players' clients, until you bring it in."
+      },
+      "defaultOnComplete": {
+        "name": "New dial: once complete",
+        "hint": "What a freshly created dial does to its slices when it fills up."
+      },
+      "defaultCelebration": {
+        "name": "New dial: celebration",
+        "hint": "How loudly a freshly created dial lands when it fills up."
       }
+    },
+    "Hud": {
+      "drag": "Move the panel",
+      "fold": "Fold the panel",
+      "close": "Hide the panel (bring it back from the module settings)"
+    },
+    "Combat": {
+      "encounter": "Encounter",
+      "dials": "Dials",
+      "open": "Open in a window",
+      "showAll": "Show to everyone"
     },
     "Sidebar": {
       "title": "Dials",
       "create": "Create dial",
       "newDial": "New dial",
-      "empty": "No dial yet."
+      "empty": "No dial yet.",
+      "reveal": "Show to the players",
+      "conceal": "Hide from the players",
+      "activate": "Bring into play",
+      "deactivate": "Take out of play",
+      "edit": "Edit dial"
     },
     "Picker": {
-      "cancel": "Cancel",
+      "close": "Close",
       "noCategories": "This dial has no category to place."
+    },
+    "Celebration": {
+      "title": "Dials",
+      "completed": "Complete",
+      "composition": "{positive} positive, {negative} negative",
+      "close": "Close"
     }
   }
 }

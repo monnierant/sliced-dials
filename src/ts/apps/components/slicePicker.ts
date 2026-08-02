@@ -35,8 +35,11 @@ function optionsFor(dial: any): Option[] {
 
   const userId = (game as any).user?.id ?? "";
 
-  return (dial.system.allowedSigns as Sign[]).flatMap((sign) =>
-    categories.map((category) => ({
+  // Category-major order keeps the positive and negative versions together.
+  // Sign-major order would draw every + first and every - afterwards, so a
+  // responsive grid could never guarantee that a pair stayed side by side.
+  return categories.flatMap((category) =>
+    (dial.system.allowedSigns as Sign[]).map((sign) => ({
       sign,
       category,
       label: ruleset?.categories[category]?.label ?? category,
@@ -53,9 +56,18 @@ function optionsFor(dial: any): Option[] {
 }
 
 function content(options: Option[]): string {
-  const buttons = options
-    .map(
-      (option) =>
+  const categories = new Map<string, Option[]>();
+  options.forEach((option) => {
+    const pair = categories.get(option.category) ?? [];
+    pair.push(option);
+    categories.set(option.category, pair);
+  });
+
+  const pairs = [...categories.values()]
+    .map((pair) => {
+      const buttons = pair
+        .map(
+          (option) =>
         `<button type="button" class="sd-pick" ` +
         `data-sign="${option.sign}" data-category="${escape(option.category)}" ` +
         `style="border-color:${escape(option.color)}" ` +
@@ -64,23 +76,34 @@ function content(options: Option[]): string {
           : `disabled title="${escape(option.verdict.reason ?? "")}"`) +
         `><span class="sd-pick-sign">${option.sign}</span>` +
         `<span class="sd-pick-label">${escape(option.label)}</span></button>`
-    )
+        )
+        .join("");
+
+      return (
+        `<div class="sd-pick-pair" role="group" ` +
+        `aria-label="${escape(pair[0].label)}">${buttons}</div>`
+      );
+    })
     .join("");
 
-  return `<div class="sd-picker">${buttons}</div>`;
+  return `<div class="sd-picker">${pairs}</div>`;
 }
 
 /**
- * Asks which slice to place, then places it.
+ * Asks which slice to place, then places it - and stays open for the next one.
+ *
+ * Filling a dial is rarely one slice: closing after each pick made the common
+ * case four clicks through a reopened window. The picker is redrawn from the
+ * dial after every placement instead, so what a slice just made impossible -
+ * a full dial, a reserved last segment - shows up as a disabled button rather
+ * than as a refusal on the click after.
  *
  * Choosing is interaction, not economy, so it lives here. A system that wants
  * to spend its own resources instead handles the intent hook and never lets
  * this open.
  */
 export async function openSlicePicker(dial: any): Promise<void> {
-  const options = optionsFor(dial);
-
-  if (options.length === 0) {
+  if (optionsFor(dial).length === 0) {
     ui.notifications?.warn(
       game.i18n?.localize("SLICEDDIALS.Picker.noCategories") ??
         "This dial has no category to place."
@@ -90,33 +113,44 @@ export async function openSlicePicker(dial: any): Promise<void> {
 
   const dialog = new DialogV2({
     window: { title: dial.name },
+    position: { width: 520 },
     classes: ["sliced-dials", "sd-picker-dialog"],
-    content: content(options),
+    content: `<div class="sd-picker-body"></div>`,
     buttons: [
       {
-        action: "cancel",
-        label: game.i18n?.localize("SLICEDDIALS.Picker.cancel") ?? "Cancel",
+        action: "close",
+        label: game.i18n?.localize("SLICEDDIALS.Picker.close") ?? "Close",
       },
     ],
   });
 
   await dialog.render({ force: true });
 
-  // Wired after render rather than through DialogV2's own button list: the
-  // buttons carry a colour and a disabled reason, and placing happens on the
-  // click itself, so no result has to be handed back through the dialog.
-  const buttons: HTMLButtonElement[] = Array.from(
-    dialog.element?.querySelectorAll(".sd-pick") ?? []
-  );
+  const body = dialog.element?.querySelector(
+    ".sd-picker-body"
+  ) as HTMLElement | null;
+  if (!body) return;
 
-  buttons.forEach((button) => {
-    button.addEventListener("click", async () => {
-      const verdict = await addSlice(dial, {
-        sign: button.dataset.sign as Sign,
-        category: button.dataset.category!,
+  // Redrawn from the dial rather than patched: the options are cheap to build,
+  // and a partial update is how a picker starts disagreeing with the dial it
+  // is meant to be showing.
+  const paint = (): void => {
+    body.innerHTML = content(optionsFor(dial));
+
+    // Wired after each paint rather than through DialogV2's own button list:
+    // the buttons carry a colour and a disabled reason, and placing happens on
+    // the click itself, so no result has to be handed back through the dialog.
+    body.querySelectorAll<HTMLButtonElement>(".sd-pick").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const verdict = await addSlice(dial, {
+          sign: button.dataset.sign as Sign,
+          category: button.dataset.category!,
+        });
+        if (!verdict.ok) ui.notifications?.warn(verdict.reason ?? "Refused");
+        paint();
       });
-      if (!verdict.ok) ui.notifications?.warn(verdict.reason ?? "Refused");
-      dialog.close();
     });
-  });
+  };
+
+  paint();
 }

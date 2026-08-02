@@ -1,6 +1,8 @@
-# 0006 — Three display surfaces, including a dedicated sidebar tab
+# 0006 — Three display surfaces, once including a dedicated sidebar tab
 
-**Status:** accepted, one part on thin ice
+**Status:** superseded in part by
+[ADR 0007](0007-dials-live-in-the-combat-tracker.md); the dedicated root tab
+was subsequently removed rather than keeping two sidebar entries for dials
 
 ## Context
 
@@ -16,8 +18,8 @@ Three surfaces:
 
 1. An **anchored panel**, always on screen, draggable, foldable, and removable
    through a client setting.
-2. A **dedicated sidebar tab**, so a GM's working set during a fight is not
-   mixed in with the system's gear.
+2. A **dedicated sidebar tab**, later removed when the combat tracker became
+   the main home.
 3. A **mount function** systems call to put a document's dials on their own
    sheets, for dials embedded on an actor.
 
@@ -32,7 +34,7 @@ Three surfaces:
   bar behind: a panel that can vanish with no handle left is one you cannot get
   back. A saved position is clamped to the viewport on every render, so a
   resized window cannot park it out of reach.
-- **Registering a sidebar tab is not a documented Foundry extension point.** The
-  code checks for the registry and warns instead of taking the module down if a
-  future version moves it; dials stay reachable from the Items tab and the panel
-  either way. Expect this to be the first thing to break on a major upgrade.
+- Registering a sidebar tab was not a documented Foundry extension point and
+  claimed another icon beside the Combat tab that now contains the same dials.
+  Removing it leaves the Items tab for preparation and the combat tracker for
+  play.

@@ -1,0 +1,144 @@
+// Dials grafted into the combat tracker. The markup around this belongs to
+// Foundry - and possibly to another module that replaced it - so everything
+// here is scoped to our own classes and inherits the rest.
+
+.sd-hidden {
+  display: none !important;
+}
+
+.sd-combat-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px 4px 0;
+  flex: 0 0 auto;
+
+  .sd-combat-tab {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 2px 4px;
+    font-size: 12px;
+    line-height: 1.6;
+    background: rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+
+    &.sd-active {
+      background: rgba(0, 0, 0, 0.25);
+      font-weight: bold;
+    }
+  }
+
+  .sd-combat-count {
+    font-size: 10px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.35);
+  }
+}
+
+.sd-combat-dials {
+  // Takes the height the combatant list gave up, and scrolls on its own rather
+  // than pushing the tracker's footer off the bottom.
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 4px;
+
+  // A fight can have a lot of dials, and the tracker is a narrow column: rows
+  // are packed nearly edge to edge, with just enough of a gap to read as
+  // separate.
+  .sd-hud-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .sd-hud-dial {
+    width: 100%;
+    display: grid;
+    // Controls, dial, name. The controls lead because they are the column the
+    // GM's eye runs down when scanning the list; the dial then sits directly
+    // against the name it belongs to.
+    grid-template-columns: auto 44px minmax(0, 1fr);
+    grid-auto-rows: minmax(0, auto);
+    align-items: center;
+    gap: 4px;
+    padding: 1px 3px;
+    text-align: left;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.08);
+  }
+
+  // The dial sets the height of the row, so nothing beside it may be taller.
+  .sd-dial {
+    grid-column: 2;
+    width: 44px;
+    height: 44px;
+    max-width: none;
+    margin: 0;
+  }
+
+  .sd-hud-label {
+    grid-column: 3;
+    min-width: 0;
+    font-size: 12px;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  // The shared controls normally float over a dial. Here they stack in a
+  // column to its left: three small buttons still come in under the dial's own
+  // height, so they cost the row nothing.
+  .sd-dial-controls {
+    position: static;
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
+  }
+
+  // Tighter than the shared badge: here the three of them share a column with
+  // the dial and must total less than its 44px.
+  .sd-eye,
+  .sd-undo,
+  .sd-edit {
+    --button-size: 13px;
+    height: 13px;
+    padding: 0 3px;
+    font-size: 9px;
+  }
+
+  .sd-combat-empty {
+    padding: 8px;
+    opacity: 0.7;
+    font-size: 12px;
+  }
+
+  // The action bar sits above the dials rather than in the tab nav, so it
+  // survives the dials-only mode where there is no nav at all.
+  .sd-combat-actions {
+    display: flex;
+    gap: 4px;
+    padding: 0 0 6px;
+  }
+
+  .sd-combat-action {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 2px 6px;
+    font-size: 12px;
+    line-height: 1.6;
+
+    // The one with a label - creating a dial - takes what is left.
+    &:last-child {
+      flex: 1 1 auto;
+    }
+  }
+}

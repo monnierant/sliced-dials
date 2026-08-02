@@ -2,7 +2,7 @@
 // exposes this component, so importing it back would close a cycle.
 import { getRuleset } from "../../registry";
 import { Category, Slice } from "../../types";
-import { segments } from "./dialGeometry";
+import { insetSegmentPath, segments } from "./dialGeometry";
 
 const categoryOf = (dial: any, key: string): Category | undefined =>
   getRuleset(dial?.system?.ruleset)?.categories[key];
@@ -20,6 +20,11 @@ const RADIUS = CENTRE - 1;
 const EMPTY_FILL = "rgba(105, 105, 105, 0.6)";
 const FALLBACK_FILL = "#7a7a7a";
 
+// How far the reserved marker sits inside its wedge. Enough that the grey slot
+// is still read as the slot, and that the marker's own thick outline has room
+// to be seen as an outline rather than as a fill.
+const INSET = 5;
+
 // Dial names and category labels are user input and land in markup.
 function escape(value: string): string {
   return String(value)
@@ -33,6 +38,37 @@ function sliceTitle(dial: any, slice: Slice): string {
   const label = categoryOf(dial, slice.category)?.label ?? slice.category;
   const who = (game as any).users?.get(slice.userId)?.name ?? "";
   return escape([`${slice.sign}1 ${label}`, who].filter(Boolean).join(" - "));
+}
+
+/**
+ * Names the category a dial has to be closed with. Falls back to the raw key
+ * exactly as `sliceTitle` does: a category the ruleset does not define is drawn
+ * and named the same way whether it has been placed or is merely awaited.
+ */
+function closingTitle(dial: any, category: string): string {
+  const label = categoryOf(dial, category)?.label ?? category;
+  const i18n = (game as any).i18n;
+
+  return (
+    i18n?.format?.("SLICEDDIALS.Dial.closedBy", { category: label }) ??
+    `Closed by ${label}`
+  );
+}
+
+/**
+ * What the dial *is* - an objective, a threat, or neither. Its own field, and
+ * not read off `allowedSigns`: that one says what may be placed, which is a
+ * different question. A threat can perfectly well accept positive slices.
+ */
+function toneOf(dial: any): string {
+  return dial?.system?.tone ?? "neutral";
+}
+
+function toneLabel(tone: string): string {
+  const i18n = (game as any).i18n;
+  const key = `SLICEDDIALS.Dial.tone_${tone}`;
+  const text = i18n?.localize?.(key);
+  return text && text !== key ? text : "";
 }
 
 /**
@@ -74,14 +110,47 @@ export function renderDial(dial: any, options: RenderDialOptions = {}) {
   // clobber - each other's pattern.
   const patternId = `sd-hatch-${dial.id}`;
 
+  // A dial that must be closed with one category says so from its first slice
+  // on: knowing how a threat ends changes what you spend on it long before the
+  // rule starts refusing anything. Drawn on the segment the rule is about -
+  // always the wedge left of twelve - rather than on the rim, which would say
+  // that the dial is constrained without saying where.
+  const closing: string = system.closingCategory ?? "";
+  const reserved = closing ? total - 1 : -1;
+  const closingText = closing ? closingTitle(dial, closing) : "";
+
   const wedges = segments(CENTRE, CENTRE, RADIUS, total)
     .map(({ index, d }) => {
       const slice = slices[index];
 
       if (!slice) {
+        if (index !== reserved) {
+          return (
+            `<path class="sd-segment sd-segment--empty" d="${d}" ` +
+            `fill="${EMPTY_FILL}" data-index="${index}"></path>`
+          );
+        }
+
+        // Clicking any empty wedge places the next slice, not the one clicked.
+        // Everywhere else that is harmless; here a wedge singled out by colour
+        // invites the click that would place the wrong slice, so it stops
+        // answering until it really is the next one. The hover feedback goes
+        // with it: a dead wedge that lights up is a lying button.
+        const inert = (system.free ?? 1) > 1 ? " sd-segment--inert" : "";
+        const tint = categoryOf(dial, closing)?.color ?? FALLBACK_FILL;
+
         return (
-          `<path class="sd-segment sd-segment--empty" d="${d}" ` +
-          `fill="${EMPTY_FILL}" data-index="${index}"></path>`
+          `<path class="sd-segment sd-segment--empty sd-segment--reserved` +
+          `${inert}" d="${d}" fill="${EMPTY_FILL}" data-index="${index}">` +
+          (options.anonymous ? "" : `<title>${escape(closingText)}</title>`) +
+          `</path>` +
+          // A wedge drawn inside the wedge, not a wash over it: the grey slot
+          // underneath keeps saying "nothing here yet", and the shape sitting
+          // in it - outlined, dashed, barely filled - says what is expected
+          // rather than what is there.
+          `<path class="sd-segment-reserved-mark" ` +
+          `d="${insetSegmentPath(CENTRE, CENTRE, RADIUS, index, total, INSET)}" ` +
+          `fill="${tint}" stroke="${tint}"></path>`
         );
       }
 
@@ -104,15 +173,29 @@ export function renderDial(dial: any, options: RenderDialOptions = {}) {
     })
     .join("");
 
+  const tone = toneOf(dial);
+
   const classes = [
     "sd-dial",
+    `sd-dial--${tone}`,
     system.locked ? "sd-dial--locked" : "",
     options.interactive ? "sd-dial--interactive" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
-  const ariaLabel = [options.label, `${system.value}/${total}`]
+  const ariaLabel = [
+    options.label,
+    `${system.value}/${total}`,
+    // The rim carries the tone in colour, which is exactly what a screen reader
+    // cannot pass on. Said unconditionally: it is a property of the dial's
+    // shape, like its size, and names neither a category nor a player.
+    toneLabel(tone),
+    // The tint is the only thing that carries this on screen, and colour is
+    // exactly what a screen reader cannot pass on. Withheld under the same
+    // rule as the slice tooltips.
+    options.anonymous ? "" : closingText,
+  ]
     .filter(Boolean)
     .join(" ");
 

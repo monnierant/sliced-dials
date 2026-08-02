@@ -39,11 +39,69 @@ what keeps that contained.
 Correcting a dial - undoing the last slice, emptying it, locking it - is the
 GM's alone, whoever owns the dial.
 
+## States
+
+Ownership says how much of a dial a viewer gets. Its **state** says whether the
+dial is on their screen at all, and the two are checked separately:
+
+- **Prepared** - written for a session that has not happened yet. In the Items
+  tab and the directory, on no play surface.
+- **Hidden** - in play, in the tracker and the panel, for the GM alone. One eye
+  button on the dial switches it back and forth with the next one.
+- **In play** - for everyone their ownership allows.
+
+The two concealed states are enforced rather than merely undrawn: they drop
+every player's permission to None, so Foundry stops sending them the document
+at all — there is nothing left in their client for the Items tab or the console
+to show. What you had granted is kept aside and put back when the dial returns
+to play, so revealing is not a permissions rebuild. Editing permissions by hand
+while a dial is concealed is the one thing that will not survive. See
+[ADR 0008](docs/adr/0008-a-dial-has-three-states.md).
+
+A dial can also put itself away when it completes — back to hidden, or back to
+prepared — which is a separate setting from what happens to its slices.
+
+## Where dials appear
+
+- **In the combat tracker**, as a second tab next to the encounter. This is the
+  main home: it is where the table is already looking during a fight, and the
+  tracker is rendered whether or not an encounter is running, so dials that have
+  nothing to do with combat are reachable there too. Clicking a segment places a
+  slice, right-clicking a dial opens its sheet. A table that never rolls
+  initiative can set the tracker to dials only, and the encounter half goes away.
+- **In the anchored panel**, for dials that must be seen without a click.
+- **In a window**, opened from the tracker — and the GM can put that same window
+  on everyone's screen at once.
+
+The tracker tab is grafted onto the rendered markup rather than installed by
+subclassing `CONFIG.ui.combat`, which is a single slot and the one every combat
+tracker module claims. If another module replaces the combatant list with markup
+we cannot find, the graft gives up quietly and the other homes still work.
+
+## Completion
+
+A dial that fills up is the moment the table has been playing towards, so it
+gets one: a glow on the dial, or a window for everybody, or nothing at all —
+per dial, because the end of a heist and a threat clock ticking over do not
+deserve the same noise.
+
+Two other things are declared per dial:
+
+- **Closed by** reserves the last segment for one category. "This dial must be
+  closed with a smooth" makes the final slice the interesting one instead of a
+  formality. Beware the dial nobody can close: it stays one short.
+- **Once complete** locks the dial, empties it, or leaves it alone.
+
+New dials start from world defaults — size, ruleset, state, completion,
+celebration — set in the module settings, so the shape a table makes over and
+over costs no clicks.
+
 ## Status
 
 Working, and driving Cowboy Bebop's objective and threat dials. Dials, the
-ruleset API, the SVG component, the anchored panel, the dial sheet, the sidebar
-tab, completion handling and the integration surface are all in.
+ruleset API, the SVG component, the anchored panel, the dial sheet, the combat
+tracker tab, states, the shared window, completion handling and
+the integration surface are all in.
 
 See **[docs/ROADMAP.md](docs/ROADMAP.md)** for what is left and what has not
 been verified, and **[docs/adr/](docs/adr/)** for the decisions this is built
@@ -80,6 +138,14 @@ interaction. Pass `{ interactive: false }` for a read-only display.
 If your sheet wants to place the pieces itself, the same thing comes apart:
 `api.dialsOf(document)`, `api.renderDialList(dials)`, `api.activateDialList(root)`,
 and `api.renderDial(dial)` for a single one.
+
+`dialsOf` returns what is *in play* for this user — prepared dials left out,
+hidden ones for the GM alone. Pass `{ states: "all" }` if you are building
+something the GM prepares with. Move a dial with `api.setState(dial, "active")`
+and never by writing `system.state` yourself: the state carries the dial's
+ownership with it, and a raw write would leave the two disagreeing. It is
+GM-only, and it is the mechanism behind
+[ADR 0008](docs/adr/0008-a-dial-has-three-states.md).
 
 ### Spending your own resources
 

@@ -1,0 +1,35 @@
+// The announcement posted on every placement and every completion. It is a log
+// line, not an event: it sits in a column shared with attack rolls and table
+// talk, and it should take about as much room as one of those.
+.sd-chat-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  // Chat messages carry a default paragraph rhythm this card does not want.
+  margin: 0;
+  font-size: var(--font-size-13, 13px);
+  line-height: 1.25;
+
+  .sd-dial {
+    flex: 0 0 auto;
+    // Small enough to read as an icon rather than as a figure. The wedges stay
+    // legible at this size; the per-slice tooltips do the rest on hover.
+    width: 36px;
+    height: 36px;
+    max-width: none;
+  }
+}
+
+.sd-chat-lines {
+  min-width: 0;
+}
+
+.sd-chat-line {
+  // Long dial names must wrap rather than push the drawing out of the card.
+  overflow-wrap: anywhere;
+}
+
+.sd-chat-detail {
+  opacity: 0.75;
+  font-size: 0.9em;
+}

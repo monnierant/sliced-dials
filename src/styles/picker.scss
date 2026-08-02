@@ -1,12 +1,22 @@
 .sd-picker-dialog {
   .sd-picker {
     display: grid;
-    // Auto-fit rather than a fixed column count: a ruleset with three
-    // categories and one with twelve both have to lay out sensibly.
-    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    // Each grid cell is a whole category pair. The outer grid therefore shows
+    // one pair (two buttons) on a narrow dialog and two pairs (four buttons)
+    // when there is room, without ever wrapping a + away from its -.
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 6px;
     padding: 4px 2px;
     min-width: 260px;
+  }
+
+  .sd-pick-pair {
+    display: grid;
+    // A single-signed dial has one option and lets it fill the pair; a mixed
+    // dial gets its + and - in two equal columns.
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: 6px;
+    min-width: 0;
   }
 
   .sd-pick {

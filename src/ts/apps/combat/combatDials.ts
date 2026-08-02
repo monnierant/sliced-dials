@@ -5,6 +5,9 @@ import {
   renderDialList,
 } from "../components/dialList";
 import { createDial } from "../components/createDial";
+import { openDialsPopup, showDialsToAll } from "../DialsPopup";
+import { isDialsOnly, registerCombatSettings } from "./combatSettings";
+import { filterCombatDials } from "./combatFilter";
 
 // Dials belong where the table is already looking during a fight, so they get a
 // tab inside the combat tracker rather than a root tab of their own. The
@@ -51,12 +54,18 @@ function buildNav(count: number): HTMLElement {
   const nav = document.createElement("nav");
   nav.className = "sd-combat-tabs";
 
-  const tab = (id: string, label: string, badge?: number) => {
+  const tab = (id: string, label: string, badge?: number, icon?: string) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "sd-combat-tab";
     button.dataset.sdTab = id;
-    button.textContent = label;
+    if (icon) {
+      const glyph = document.createElement("i");
+      glyph.className = `fa-solid ${icon}`;
+      glyph.setAttribute("aria-hidden", "true");
+      button.append(glyph);
+    }
+    button.append(label);
     if (badge) {
       const span = document.createElement("span");
       span.className = "sd-combat-count";
@@ -68,7 +77,12 @@ function buildNav(count: number): HTMLElement {
 
   nav.append(
     tab(ENCOUNTER, localize("SLICEDDIALS.Combat.encounter")),
-    tab(DIALS, localize("SLICEDDIALS.Combat.dials"), count)
+    tab(
+      DIALS,
+      localize("SLICEDDIALS.Combat.dials"),
+      count,
+      "fa-chart-pie"
+    )
   );
 
   return nav;
@@ -84,25 +98,63 @@ function buildSection(dials: any[]): HTMLElement {
     empty.textContent = localize("SLICEDDIALS.Sidebar.empty");
     section.append(empty);
   } else {
-    section.insertAdjacentHTML("beforeend", renderDialList(dials));
+    section.insertAdjacentHTML(
+      "beforeend",
+      renderDialList(dials, { controls: true })
+    );
+  }
+
+  section.prepend(buildActions(dials.length));
+  return section;
+}
+
+/**
+ * The bar above the dials. It sits inside the section rather than in the tab
+ * nav so it survives the dials-only mode, where there is no nav at all.
+ */
+function buildActions(count: number): HTMLElement {
+  const actions = document.createElement("div");
+  actions.className = "sd-combat-actions";
+
+  const button = (
+    icon: string,
+    key: string,
+    onClick: () => void,
+    label = false
+  ) => {
+    const element = document.createElement("button");
+    element.type = "button";
+    element.className = "sd-combat-action";
+    element.title = localize(key);
+    // Icon-only unless `label` says otherwise, so the accessible name has to
+    // be stated: a title is a hover affordance, not a name.
+    element.setAttribute("aria-label", localize(key));
+    element.innerHTML = `<i class="fa-solid ${icon}"></i>`;
+    if (label) element.append(` ${localize(key)}`);
+    element.addEventListener("click", onClick);
+    return element;
+  };
+
+  // Nothing to put in a window, and nothing to push at anyone.
+  if (count > 0) {
+    actions.append(
+      button("fa-up-right-and-down-left-from-center", "SLICEDDIALS.Combat.open", openDialsPopup)
+    );
+
+    if ((game as any).user?.isGM) {
+      actions.append(
+        button("fa-eye", "SLICEDDIALS.Combat.showAll", showDialsToAll)
+      );
+    }
   }
 
   if ((game as any).user?.isGM) {
-    const actions = document.createElement("div");
-    actions.className = "sd-combat-actions";
-
-    const create = document.createElement("button");
-    create.type = "button";
-    create.className = "sd-combat-create";
-    create.innerHTML = `<i class="fa-solid fa-plus"></i> `;
-    create.append(localize("SLICEDDIALS.Sidebar.create"));
-    create.addEventListener("click", () => void createDial());
-
-    actions.append(create);
-    section.append(actions);
+    actions.append(
+      button("fa-plus", "SLICEDDIALS.Sidebar.create", () => void createDial(), true)
+    );
   }
 
-  return section;
+  return actions;
 }
 
 /**
@@ -129,13 +181,23 @@ function trackerParts(root: HTMLElement, tracker: HTMLElement): HTMLElement[] {
 }
 
 function applyTab(root: HTMLElement, tracker: HTMLElement): void {
-  const showing = root.querySelector(".sd-combat-tabs") ? activeTab : ENCOUNTER;
+  const section = root.querySelector<HTMLElement>(".sd-combat-dials");
+
+  // Dials-only means there is no nav to switch with, so the section is the
+  // whole tracker - unless there is no section, in which case hiding the
+  // encounter would leave an empty panel.
+  const showing = section
+    ? isDialsOnly()
+      ? DIALS
+      : root.querySelector(".sd-combat-tabs")
+        ? activeTab
+        : ENCOUNTER
+    : ENCOUNTER;
 
   trackerParts(root, tracker).forEach((part) =>
     part.classList.toggle("sd-hidden", showing === DIALS)
   );
 
-  const section = root.querySelector<HTMLElement>(".sd-combat-dials");
   section?.classList.toggle("sd-hidden", showing !== DIALS);
 
   root.querySelectorAll<HTMLElement>(".sd-combat-tab").forEach((button) => {
@@ -171,7 +233,7 @@ function inject(root: HTMLElement): void {
     .querySelectorAll(".sd-combat-tabs, .sd-combat-dials")
     .forEach((node) => node.remove());
 
-  const dials = dialsOf((game as any).items);
+  const dials = filterCombatDials(dialsOf((game as any).items));
 
   // Nothing to show and nothing to create: a player in a game without dials
   // gets the plain tracker back, tabs and all removed.
@@ -180,18 +242,22 @@ function inject(root: HTMLElement): void {
     return;
   }
 
-  const nav = buildNav(dials.length);
   const section = buildSection(dials);
-
-  tracker.before(nav);
   tracker.after(section);
 
-  nav.querySelectorAll<HTMLElement>(".sd-combat-tab").forEach((button) => {
-    button.addEventListener("click", () => {
-      activeTab = button.dataset.sdTab ?? ENCOUNTER;
-      applyTab(root, tracker);
+  // In dials-only mode there is nothing to switch between, so there is no nav
+  // to draw: the dials simply are the tracker.
+  if (!isDialsOnly()) {
+    const nav = buildNav(dials.length);
+    tracker.before(nav);
+
+    nav.querySelectorAll<HTMLElement>(".sd-combat-tab").forEach((button) => {
+      button.addEventListener("click", () => {
+        activeTab = button.dataset.sdTab ?? ENCOUNTER;
+        applyTab(root, tracker);
+      });
     });
-  });
+  }
 
   activateDialList(section);
   activateSheetOpening(section);
@@ -206,6 +272,8 @@ function refresh(): void {
 }
 
 export function registerCombatTrackerTab(): void {
+  registerCombatSettings();
+
   Hooks.on("renderCombatTracker", ((_app: any, html: any) => {
     // v13 hands over an HTMLElement; older versions a jQuery object.
     const root: HTMLElement | undefined = html?.[0] ?? html;

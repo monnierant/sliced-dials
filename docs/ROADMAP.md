@@ -47,8 +47,16 @@ exercised at a table:
 
 - `onComplete: "reset"` — the recurring-dial path. Only `lock` has been seen.
 - Multi-client sync: two players, one dial, simultaneous placement.
-- The sidebar tab against anything other than the currently installed Foundry
-  version — see [ADR 0006](adr/0006-a-dedicated-sidebar-tab.md).
+- Anything crossing the socket ([ADR 0009](adr/0009-one-socket-that-only-ever-shows.md)):
+  the shared window and the completion modal have only been seen on one client.
+  Two clients completing two dials at the same instant will show two modals.
+- The celebration itself. A glow that fires while the dial is being taken off
+  the screen — a dial that puts itself away on completion — is timed against a
+  shared constant and has not been watched at a table.
+- The combat tracker tab against a module that replaces the tracker — Carousel,
+  Dock, and the like. It is built to degrade rather than break
+  ([ADR 0007](adr/0007-dials-live-in-the-combat-tracker.md)), and that has been
+  seen against core's tracker only.
 - Dials embedded on an actor, through `mountDials`, in a real system sheet.
 
 `npm test` covers the geometry, the sizes and trimming, registration,
@@ -61,9 +69,11 @@ machinery, sync, or anything visual.
 - **Second filling method.** Cards were the original idea and turned out to be
   tokens, but the intent hook makes other sources cheap: a roll result posting a
   "place this" button into chat, for instance.
-- **Combat-scoped dials.** Dials are world-level or actor-embedded. A dial that
-  belongs to the current combat and is cleaned up with it was discussed and
-  deferred.
+- **Combat-scoped dials.** Not to be confused with the combat tracker tab, which
+  exists ([ADR 0007](adr/0007-dials-live-in-the-combat-tracker.md)) and is only a
+  place to *show* dials. A dial that actually *belongs* to an encounter — created
+  with it, cleaned up with it — is still a lifetime the module has no concept of.
+  Dials are world-level or actor-embedded, and nothing more.
 - **Publishing.** The release pipeline works and cuts GitHub releases. Publishing
   to the Foundry registry needs `FVTT_PUBLISH_TOKEN` set on the repository.
 - **Ghost in the Shell.** The second consumer, and the real test of whether the

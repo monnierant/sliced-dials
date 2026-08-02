@@ -11,6 +11,7 @@ import {
   isHudEnabled,
   registerHudSettings,
   setCollapsed,
+  setHudEnabled,
   setPosition,
 } from "./hudSettings";
 
@@ -43,19 +44,30 @@ export default class DialsHud extends ApplicationV2 {
     if (dials.length === 0) return "";
 
     // Folding leaves the grip bar behind rather than everything: a panel that
-    // can vanish with no handle left is a panel you cannot get back.
+    // can vanish with no handle left is a panel you cannot get back. The cross
+    // beside it is the deliberate version of that - it does make the panel
+    // vanish, and its tooltip says where to find it again.
     const collapsed = isCollapsed();
+    const label = (key: string) =>
+      (game as any).i18n?.localize(`SLICEDDIALS.Hud.${key}`) ?? key;
+
     const header =
       `<div class="sd-hud-header">` +
-      `<i class="sd-hud-grip fa-solid fa-grip-lines" title="Drag"></i>` +
+      `<i class="sd-hud-grip fa-solid fa-grip-lines" ` +
+      `title="${label("drag")}"></i>` +
       `<span class="sd-hud-count">${dials.length}</span>` +
-      `<button type="button" class="sd-hud-fold" title="Fold">` +
+      `<button type="button" class="sd-hud-fold" title="${label("fold")}" ` +
+      `aria-label="${label("fold")}">` +
       `<i class="fa-solid fa-chevron-${collapsed ? "down" : "up"}"></i>` +
+      `</button>` +
+      `<button type="button" class="sd-hud-close" title="${label("close")}" ` +
+      `aria-label="${label("close")}">` +
+      `<i class="fa-solid fa-xmark"></i>` +
       `</button></div>`;
 
     if (collapsed) return header;
 
-    return header + renderDialList(dials);
+    return header + renderDialList(dials, { controls: true });
   }
 
   _replaceHTML(result: string, content: HTMLElement): void {
@@ -163,6 +175,11 @@ export default class DialsHud extends ApplicationV2 {
         await setCollapsed(!isCollapsed());
         this.render(true);
       });
+
+    // The setting's own onChange does the redraw, so this only has to flip it.
+    root
+      .querySelector<HTMLButtonElement>(".sd-hud-close")
+      ?.addEventListener("click", () => void setHudEnabled(false));
 
     activateDialList(root);
   }

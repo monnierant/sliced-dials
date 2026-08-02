@@ -25,8 +25,17 @@ export const completedHook = "slicedDials.completed" as const;
 // validator if the cost could not be met.
 export const placedHook = "slicedDials.slicePlaced" as const;
 
+// How long a completion is celebrated for. Shared, because putting a finished
+// dial away has to wait for the celebration it would otherwise cut off.
+export const celebrationMs = 2400;
+
 // Fired when a user asks to place a slice on a segment. A system that handles
 // it returns false - the Foundry convention for "I am taking over" - debits its
 // own economy and calls addSlice itself. Left unhandled, the module asks which
 // slice to place, which is interaction rather than economy.
 export const intentHook = "slicedDials.sliceIntent" as const;
+
+// Systems may veto a dial on combat surfaces without changing its document
+// state or hiding it from the module's other homes. Returning false excludes
+// it from the tracker and the window opened from that tracker.
+export const combatFilterHook = "slicedDials.filterCombatDial" as const;

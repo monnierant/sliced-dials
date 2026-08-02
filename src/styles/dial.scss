@@ -19,10 +19,59 @@
     stroke-dasharray: 2.5 2;
   }
 
+  // The marker drawn inside the segment a dial has to end on. Outlined thick
+  // and dashed rather than filled: a filled shape of the category colour is
+  // what a *placed* slice looks like, and this one is a slot still waiting.
+  // The fill is only there to name the colour on a small dial, where a stroke
+  // alone would be a few pixels of it.
+  .sd-segment-reserved-mark {
+    fill-opacity: 0.25;
+    stroke-width: 2.4;
+    stroke-dasharray: 8 5;
+    // Square-cut, and this is what makes the dashes dashes: a round cap
+    // overhangs by half the stroke width at each end - 2.4 on a 2.6 gap - so
+    // the dashes reach for each other and the line reads as solid.
+    stroke-linecap: butt;
+    // Round joins are what turn the wedge into the soft shape it should be:
+    // a sharp point at the centre reads as a shard, not as a reserved slot.
+    stroke-linejoin: round;
+    // The category colour, taken down a few stops. At full strength it is the
+    // colour a *placed* slice is drawn in, and the two must not be the same
+    // ink; darker also holds up against the mid grey of an empty slot on both
+    // a dark panel and a light sheet.
+    filter: brightness(0.7);
+    pointer-events: none;
+  }
+
+  // Not the next slot yet, so it does not answer. Set on the wedge rather than
+  // guarded in the click handler because the hover feedback has to go with it,
+  // and one rule cannot get out of step with itself.
+  .sd-segment--inert {
+    pointer-events: none;
+  }
+
+  // The rim says what the dial takes. Neutral is the near-black it always was:
+  // a dial that accepts everything is the unmarked case, and tinting it too
+  // would leave nothing for the other two to stand out against.
   .sd-dial-rim {
     stroke: rgba(0, 0, 0, 0.7);
     stroke-width: 1.4;
     pointer-events: none;
+  }
+
+  // Thicker as well as coloured, and the negative one dashed: the same rule the
+  // hatching on negative slices follows. Colour alone would be lost on a
+  // colour-blind player, and the rim is the one part of the dial that has no
+  // tooltip to fall back on.
+  &.sd-dial--positive .sd-dial-rim {
+    stroke: #1f7a45;
+    stroke-width: 2.4;
+  }
+
+  &.sd-dial--negative .sd-dial-rim {
+    stroke: #a52222;
+    stroke-width: 2.4;
+    stroke-dasharray: 5 3;
   }
 
   // The hatch overlay sits on top of its wedge and must never swallow the
@@ -51,5 +100,35 @@
     .sd-segment {
       cursor: default;
     }
+  }
+}
+
+// A dial that has just filled up. The glow is the discreet celebration; the
+// modal is a separate window and does not need this.
+@keyframes sd-celebrate {
+  0% {
+    filter: none;
+    transform: scale(1);
+  }
+  20% {
+    filter: drop-shadow(0 0 10px rgba(255, 226, 145, 0.95));
+    transform: scale(1.09);
+  }
+  100% {
+    filter: none;
+    transform: scale(1);
+  }
+}
+
+.sd-dial.sd-celebrating {
+  transform-origin: 50% 50%;
+  animation: sd-celebrate 2.4s ease-out;
+}
+
+// A completion is worth announcing, not worth making anyone ill.
+@media (prefers-reduced-motion: reduce) {
+  .sd-dial.sd-celebrating {
+    animation: none;
+    filter: drop-shadow(0 0 10px rgba(255, 226, 145, 0.95));
   }
 }

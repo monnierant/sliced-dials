@@ -19,6 +19,11 @@ export interface Slice {
 // never this module's business; this is only the state the dial is left in.
 export type OnComplete = "lock" | "reset" | "none";
 
+// Where a dial is in play. State and permission answer different questions,
+// but concealed states also strip player ownership so the document itself no
+// longer reaches their clients. See ADR 0008.
+export type DialState = "inactive" | "hidden" | "active";
+
 export interface Category {
   label: string;
   // CSS colour used for the slice fill.

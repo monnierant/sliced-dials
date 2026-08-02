@@ -2,6 +2,13 @@
   <div class="sd-sheet-preview">
     {{{preview}}}
     <div class="sd-sheet-count">{{system.value}}/{{system.size}}</div>
+    {{#if isGM}}
+    <button type="button" class="sd-sheet-undo" data-action="undo"
+      {{#unless canUndo}}disabled{{/unless}}>
+      <i class="fa-solid fa-rotate-left"></i>
+      {{localize "SLICEDDIALS.Sheet.removeLastSlice"}}
+    </button>
+    {{/if}}
   </div>
 
   <div class="sd-sheet-fields">
@@ -10,12 +17,42 @@
       <input type="text" name="name" value="{{dial.name}}" {{#unless editable}}disabled{{/unless}} />
     </div>
 
+    {{#if isGM}}
+    <div class="form-group">
+      <label data-tooltip="{{localize "SLICEDDIALS.Sheet.stateHint"}}">
+        {{localize "SLICEDDIALS.Sheet.state"}}
+        <i class="fa-regular fa-circle-question sd-sheet-hint"></i>
+      </label>
+      <select name="state" {{#unless editable}}disabled{{/unless}}>
+        {{#each stateChoices}}
+        <option value="{{value}}" {{#if selected}}selected{{/if}}>
+          {{localize (concat "SLICEDDIALS.Sheet.state_" value)}}
+        </option>
+        {{/each}}
+      </select>
+    </div>
+    {{/if}}
+
     <div class="form-group">
       <label>{{localize "SLICEDDIALS.Sheet.size"}}</label>
       <select name="size" {{#unless editable}}disabled{{/unless}}>
         {{#each sizes}}
         <option value="{{value}}" {{#if selected}}selected{{/if}}>
           {{value}}{{#if lossy}} &#9888;{{/if}}
+        </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label data-tooltip="{{localize "SLICEDDIALS.Sheet.toneHint"}}">
+        {{localize "SLICEDDIALS.Sheet.tone"}}
+        <i class="fa-regular fa-circle-question sd-sheet-hint"></i>
+      </label>
+      <select name="tone" {{#unless editable}}disabled{{/unless}}>
+        {{#each toneChoices}}
+        <option value="{{value}}" {{#if selected}}selected{{/if}}>
+          {{localize (concat "SLICEDDIALS.Sheet.tone_" value)}}
         </option>
         {{/each}}
       </select>
@@ -35,19 +72,26 @@
     <p class="notification warning">{{localize "SLICEDDIALS.Sheet.noRuleset"}}</p>
     {{/if}}
 
-    <div class="form-group">
+    <div class="form-group sd-sheet-signs">
       <label>{{localize "SLICEDDIALS.Sheet.signs"}}</label>
-      <select name="signChoice" {{#unless editable}}disabled{{/unless}}>
-        <option value="both" {{#if (eq signChoice "both")}}selected{{/if}}>
-          {{localize "SLICEDDIALS.Sheet.signBoth"}}
-        </option>
-        <option value="positive" {{#if (eq signChoice "positive")}}selected{{/if}}>
-          {{localize "SLICEDDIALS.Sheet.signPositive"}}
-        </option>
-        <option value="negative" {{#if (eq signChoice "negative")}}selected{{/if}}>
-          {{localize "SLICEDDIALS.Sheet.signNegative"}}
-        </option>
-      </select>
+      <div class="sd-sheet-sign-controls">
+        <select name="signChoice" {{#unless editable}}disabled{{/unless}}>
+          <option value="both" {{#if (eq signChoice "both")}}selected{{/if}}>
+            {{localize "SLICEDDIALS.Sheet.signBoth"}}
+          </option>
+          <option value="positive" {{#if (eq signChoice "positive")}}selected{{/if}}>
+            {{localize "SLICEDDIALS.Sheet.signPositive"}}
+          </option>
+          <option value="negative" {{#if (eq signChoice "negative")}}selected{{/if}}>
+            {{localize "SLICEDDIALS.Sheet.signNegative"}}
+          </option>
+        </select>
+        <label class="sd-sheet-locked">
+          <input type="checkbox" name="locked" {{#if system.locked}}checked{{/if}}
+            {{#unless editable}}disabled{{/unless}} />
+          {{localize "SLICEDDIALS.Sheet.locked"}}
+        </label>
+      </div>
     </div>
 
     {{#if categories.length}}
@@ -65,6 +109,21 @@
     </div>
     {{/if}}
 
+    {{#if closingChoices.length}}
+    <div class="form-group">
+      <label data-tooltip="{{localize "SLICEDDIALS.Sheet.closingHint"}}">
+        {{localize "SLICEDDIALS.Sheet.closingCategory"}}
+        <i class="fa-regular fa-circle-question sd-sheet-hint"></i>
+      </label>
+      <select name="closingCategory" {{#unless editable}}disabled{{/unless}}>
+        <option value="">{{localize "SLICEDDIALS.Sheet.closingAny"}}</option>
+        {{#each closingChoices}}
+        <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </div>
+    {{/if}}
+
     <div class="form-group">
       <label>{{localize "SLICEDDIALS.Sheet.onComplete"}}</label>
       <select name="onComplete" {{#unless editable}}disabled{{/unless}}>
@@ -77,15 +136,29 @@
     </div>
 
     <div class="form-group">
-      <label>
-        <input type="checkbox" name="locked" {{#if system.locked}}checked{{/if}}
-          {{#unless editable}}disabled{{/unless}} />
-        {{localize "SLICEDDIALS.Sheet.locked"}}
-      </label>
+      <label>{{localize "SLICEDDIALS.Sheet.onCompleteState"}}</label>
+      <select name="onCompleteState" {{#unless editable}}disabled{{/unless}}>
+        {{#each onCompleteStateChoices}}
+        <option value="{{value}}" {{#if selected}}selected{{/if}}>
+          {{localize (concat "SLICEDDIALS.Sheet.onCompleteState_" value)}}
+        </option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "SLICEDDIALS.Sheet.celebration"}}</label>
+      <select name="celebration" {{#unless editable}}disabled{{/unless}}>
+        {{#each celebrationChoices}}
+        <option value="{{value}}" {{#if selected}}selected{{/if}}>
+          {{localize (concat "SLICEDDIALS.Sheet.celebration_" value)}}
+        </option>
+        {{/each}}
+      </select>
     </div>
 
     {{#if isGM}}
-    <div class="form-group">
+    <div class="form-group sd-sheet-note">
       <label>{{localize "SLICEDDIALS.Sheet.gmNote"}}</label>
       <textarea name="gmNote" rows="2">{{system.gmNote}}</textarea>
     </div>

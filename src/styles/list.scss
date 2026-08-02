@@ -1,0 +1,71 @@
+// The parts of the shared dial list that belong to the component rather than to
+// any one surface. The panel, the combat tracker and the window all draw the
+// same markup, and these must look the same in all three.
+
+.sd-hud-dial {
+  // The GM controls are positioned against this.
+  position: relative;
+}
+
+// A dial the players cannot see. Dashed rather than merely faded: faded reads
+// as "disabled", and the GM has to be able to tell at a glance which of these
+// the table is looking at.
+.sd-dial-hidden {
+  outline: 1px dashed rgba(255, 255, 255, 0.55);
+  outline-offset: 2px;
+}
+
+.sd-dial-controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  gap: 1px;
+}
+
+// Foundry sizes every button in an application from --button-size (~2em) and
+// backs it with both height and min-height. These three are badges over a dial,
+// not form buttons, so they opt out of that sizing entirely - otherwise they
+// dwarf the dial they annotate, and any layout that gives them a column of
+// their own inherits their height.
+.sd-eye,
+.sd-undo,
+.sd-edit,
+.sd-power {
+  --button-size: 14px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 0;
+  height: 14px;
+  min-height: 0;
+  margin: 0;
+  padding: 1px 3px;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 4px;
+  color: #eee;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+
+  > i {
+    margin: 0;
+    font-size: inherit;
+    line-height: 1;
+  }
+  opacity: 0.55;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.2;
+  }
+}

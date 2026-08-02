@@ -1,0 +1,72 @@
+// The dials at full size: the window a GM can put on everyone's screen, and the
+// completion modal.
+
+#sliced-dials-popup {
+  // Barely there on purpose: this window sits over the scene, and what is behind
+  // it stays readable.
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+
+  .window-content {
+    background: none;
+  }
+
+  .sd-popup-shell {
+    position: relative;
+  }
+
+  .sd-popup-body .sd-hud-list {
+    list-style: none;
+    margin: 0;
+    padding: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  // Bigger than the panel's: this window is for the moment everyone stops and
+  // looks, not for glancing at.
+  .sd-hud-dial {
+    width: 120px;
+    text-align: center;
+  }
+
+  .sd-hud-label {
+    margin-top: 6px;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .sd-popup-empty {
+    padding: 12px;
+    opacity: 0.7;
+  }
+}
+
+.sliced-dials-celebration {
+  .sd-celebration {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .sd-dial {
+    width: 180px;
+    height: 180px;
+  }
+
+  .sd-celebration-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .sd-celebration-line {
+    margin: 0;
+    opacity: 0.8;
+  }
+}

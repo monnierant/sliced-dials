@@ -13,6 +13,7 @@ import {
   removeLastSlice,
   resetDial,
   setLocked,
+  setState,
 } from "./slices";
 import {
   activateDialListeners,
@@ -37,6 +38,7 @@ export interface SlicedDialsApi {
   removeLastSlice: typeof removeLastSlice;
   resetDial: typeof resetDial;
   setLocked: typeof setLocked;
+  setState: typeof setState;
   getCategory: typeof getCategory;
 
   // The integration surface. `mountDials` is the one call a system needs to
@@ -59,6 +61,7 @@ export const api: SlicedDialsApi = {
   removeLastSlice,
   resetDial,
   setLocked,
+  setState,
   getCategory,
   mountDials,
   dialsOf,
