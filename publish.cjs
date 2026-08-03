@@ -35,7 +35,7 @@ async function updateReleaseVersion(githubUrl, version, authToken) {
         release: {
           version: version,
           manifest: `${githubUrl}/releases/download/v${version}/${kindOfProject}.json`,
-          notes: `${githubUrl}/releases/tag/${version}`,
+          notes: `${githubUrl}/releases/tag/v${version}`,
           compatibility: {
             minimum: compatibilityInfo.minimum,
             verified: compatibilityInfo.verified,
