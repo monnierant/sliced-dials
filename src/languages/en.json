@@ -14,6 +14,7 @@
       "name": "Name",
       "size": "Size",
       "ruleset": "Ruleset",
+      "color": "Dial colour",
       "noRuleset": "Without a ruleset this dial accepts nothing.",
       "tone": "Kind",
       "toneHint": "What this dial is, drawn as the colour of its rim. It attaches no rule: a threat may still take positive slices, which is what the accepted signs below decide.",
@@ -106,6 +107,21 @@
     "Picker": {
       "close": "Close",
       "noCategories": "This dial has no category to place."
+    },
+    "Rulesets": {
+      "counter": "Monochrome counter",
+      "slices": "Coloured slices"
+    },
+    "Categories": {
+      "progress": "Progress"
+    },
+    "Colours": {
+      "blue": "Blue",
+      "green": "Green",
+      "yellow": "Yellow",
+      "orange": "Orange",
+      "red": "Red",
+      "purple": "Purple"
     },
     "Celebration": {
       "title": "Dials",

@@ -146,8 +146,11 @@ api.registerRuleset({
       ? { ok: false, reason: "Jazz cannot open a dial." }
       : { ok: true },
 });
-// "demo" comes from the temporary scaffolding and goes away with it.
-check("ruleset listed", api.listRulesets().map((r) => r.id).sort(), ["demo", "test"]);
+check("ruleset listed", api.listRulesets().map((r) => r.id).sort(), [
+  "generic-counter",
+  "generic-slices",
+  "test",
+]);
 
 // Freezing happens at setup; a late registration must be refused.
 hooks.setup.forEach((fn) => fn());
@@ -275,6 +278,34 @@ check(
   "locked dial refuses more",
   api.canAddSlice(dial, { sign: "+", category: "rock", userId: "u1", at: 0 }).ok,
   false
+);
+
+// A ruleset with no mode keeps the historical slice semantics used by Cowboy
+// Bebop: its negative sign placed and counted a slice above. Only the explicit
+// generic counter interprets minus as movement backwards.
+const counter = makeDial({
+  ruleset: "generic-counter",
+  color: "#123456",
+  onComplete: "none",
+});
+check(
+  "empty counter refuses to recede",
+  api.canAddSlice(counter, { sign: "-", category: "progress", userId: "u1", at: 0 }).ok,
+  false
+);
+await api.addSlice(counter, { sign: "+", category: "progress" });
+await api.addSlice(counter, { sign: "+", category: "progress" });
+await api.addSlice(counter, { sign: "-", category: "progress" });
+check("counter advances then recedes", counter.system.value, 1);
+check("counter keeps only its remaining progress", counter.system.composition, {
+  positive: 1,
+  negative: 0,
+  byCategory: { progress: 1 },
+});
+check(
+  "counter uses its per-dial colour",
+  api.renderDial(counter).includes('fill="#123456"'),
+  true
 );
 
 // --- corrections are the GM's -------------------------------------------

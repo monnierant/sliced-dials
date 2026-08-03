@@ -34,6 +34,10 @@ export const dialSchema = {
   // ruleset, in which case only the declarative constraints below apply.
   ruleset: new fields.StringField({ initial: "" }),
 
+  // Per-dial fill override used by monochrome counters. Slice rulesets keep
+  // taking their colours from their categories.
+  color: new fields.StringField({ initial: "#3b82f6" }),
+
   // Declarative constraints. Empty `allowedCategories` means "any category".
   allowedCategories: new fields.ArrayField(new fields.StringField(), {
     initial: [],

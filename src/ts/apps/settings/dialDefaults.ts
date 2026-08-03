@@ -55,7 +55,9 @@ export function registerDialDefaults(): void {
     type: String,
     choices: {
       "": "—",
-      ...Object.fromEntries(rulesets.map((entry) => [entry.id, entry.id])),
+      ...Object.fromEntries(
+        rulesets.map((entry) => [entry.id, entry.label ?? entry.id])
+      ),
     },
     // One ruleset and no ambiguity: choosing it for the GM is not a guess.
     default: rulesets.length === 1 ? rulesets[0].id : "",

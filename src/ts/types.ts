@@ -44,6 +44,11 @@ export interface Verdict {
 // constraints carried by the dial itself cover the common cases.
 export interface Ruleset {
   id: string;
+  // Human-facing name. Older systems may omit it; callers then show the id.
+  label?: string;
+  // Omitted deliberately means the historical behaviour: every sign places a
+  // slice. This keeps existing rulesets, notably Cowboy Bebop, compatible.
+  mode?: "slices" | "counter";
   categories: Record<string, Category>;
   validate?: (dial: any, slice: Slice) => Verdict;
 }

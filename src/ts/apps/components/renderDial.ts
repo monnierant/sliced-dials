@@ -7,6 +7,14 @@ import { insetSegmentPath, segments } from "./dialGeometry";
 const categoryOf = (dial: any, key: string): Category | undefined =>
   getRuleset(dial?.system?.ruleset)?.categories[key];
 
+const colourOf = (dial: any, key: string): string => {
+  const ruleset = getRuleset(dial?.system?.ruleset);
+  if (ruleset?.mode === "counter" && dial?.system?.color) {
+    return dial.system.color;
+  }
+  return ruleset?.categories[key]?.color ?? FALLBACK_FILL;
+};
+
 // One component, instantiated everywhere a dial is drawn - HUD, sheet partial,
 // sidebar. Three lookalike templates would drift; this one cannot.
 
@@ -137,7 +145,7 @@ export function renderDial(dial: any, options: RenderDialOptions = {}) {
         // answering until it really is the next one. The hover feedback goes
         // with it: a dead wedge that lights up is a lying button.
         const inert = (system.free ?? 1) > 1 ? " sd-segment--inert" : "";
-        const tint = categoryOf(dial, closing)?.color ?? FALLBACK_FILL;
+        const tint = colourOf(dial, closing);
 
         return (
           `<path class="sd-segment sd-segment--empty sd-segment--reserved` +
@@ -154,8 +162,7 @@ export function renderDial(dial: any, options: RenderDialOptions = {}) {
         );
       }
 
-      const colour =
-        categoryOf(dial, slice.category)?.color ?? FALLBACK_FILL;
+      const colour = colourOf(dial, slice.category);
       const hatch =
         slice.sign === "-"
           ? `<path class="sd-segment-hatch" d="${d}" fill="url(#${patternId})"></path>`

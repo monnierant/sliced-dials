@@ -28,7 +28,11 @@ export function canAddSlice(dial: Dial, slice: Slice): Verdict {
   const system = dial?.system;
   if (!system) return no("This document is not a dial.");
   if (system.locked) return no("This dial is locked.");
-  if (system.isComplete) return no("This dial is already full.");
+
+  const ruleset = getRuleset(system.ruleset);
+  const receding = ruleset?.mode === "counter" && slice.sign === "-";
+  if (system.isComplete && !receding) return no("This dial is already full.");
+  if (receding && system.value === 0) return no("This dial is already empty.");
 
   if (!system.allowedSigns.includes(slice.sign)) {
     return no(`This dial does not accept ${slice.sign} slices.`);
@@ -48,6 +52,7 @@ export function canAddSlice(dial: Dial, slice: Slice): Verdict {
   // Checked before the ruleset's own validator so the dial's own declaration
   // always wins.
   if (
+    !receding &&
     system.closingCategory &&
     system.free === 1 &&
     slice.category !== system.closingCategory
@@ -55,7 +60,6 @@ export function canAddSlice(dial: Dial, slice: Slice): Verdict {
     return no(`This dial must be closed with "${system.closingCategory}".`);
   }
 
-  const ruleset = getRuleset(system.ruleset);
   if (ruleset) {
     if (slice.category && !ruleset.categories[slice.category]) {
       return no(
@@ -93,6 +97,15 @@ export async function addSlice(
   // between "can write" and "can delete". A player who may place slices on a
   // dial is therefore its owner, which the GM grants dial by dial.
   if (!dial.isOwner) return no("You do not have permission on this dial.");
+
+  const ruleset = getRuleset(dial.system.ruleset);
+  if (ruleset?.mode === "counter" && complete.sign === "-") {
+    await dial.update({
+      "system.slices": dial.system.slices.slice(0, -1),
+    });
+    await postPlacementMessage(dial, complete);
+    return ok;
+  }
 
   await dial.update({
     "system.slices": [...dial.system.slices, complete],

@@ -22,12 +22,11 @@ English. They need to become localisation keys.
 Rulesets supply their own reasons and are the system's business, but the module
 should probably let a system return a key rather than a sentence.
 
-### The demo ruleset is still shipped
+### Generic rulesets are shipped
 
-`debug.ts` registers a `demo` ruleset at init, added when no system provided one.
-Cowboy Bebop now registers its own, so this can go — but it is genuinely useful
-for trying the module without any system, so consider keeping it behind a
-setting rather than deleting it outright.
+The old demo ruleset has been replaced by `generic-counter` and
+`generic-slices`. They intentionally make the module useful without a consuming
+system. Systems such as Cowboy Bebop register their own rulesets alongside them.
 
 ### No dial templates
 

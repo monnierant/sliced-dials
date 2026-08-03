@@ -17,7 +17,8 @@ import { range } from "./handlebarsHelpers/range";
 import { concat } from "./handlebarsHelpers/concat";
 import { ternary } from "./handlebarsHelpers/ternary";
 import { partial } from "./handlebarsHelpers/partial";
-import { debugApi, registerDemoRuleset } from "./debug";
+import { debugApi } from "./debug";
+import { registerGenericRulesets } from "./genericRulesets";
 import { registerHudHooks } from "./apps/hud/DialsHud";
 import DialSheet from "./apps/sheets/DialSheet";
 import { registerCombatTrackerTab } from "./apps/combat/combatDials";
@@ -71,9 +72,7 @@ Hooks.once("init", () => {
   const self = (game as any).modules?.get(moduleId);
   if (self) self.api = published;
 
-  // TEMPORARY: without a ruleset nothing can be placed, and no system provides
-  // one yet. See debug.ts.
-  registerDemoRuleset();
+  registerGenericRulesets();
 
   registerHudHooks();
   registerDialSheet();

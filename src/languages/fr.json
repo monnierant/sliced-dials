@@ -14,6 +14,7 @@
       "name": "Nom",
       "size": "Taille",
       "ruleset": "Règles",
+      "color": "Couleur du cadran",
       "noRuleset": "Sans règles, ce cadran n'accepte aucune part.",
       "tone": "Nature",
       "toneHint": "Ce qu'est ce cadran, rendu par la couleur de son contour. Cela n'impose aucune règle : une menace peut très bien accepter des parts positives, c'est ce que décident les signes acceptés ci-dessous.",
@@ -106,6 +107,21 @@
     "Picker": {
       "close": "Fermer",
       "noCategories": "Ce cadran n'a aucune catégorie à poser."
+    },
+    "Rulesets": {
+      "counter": "Compteur monochrome",
+      "slices": "Tranches colorées"
+    },
+    "Categories": {
+      "progress": "Progression"
+    },
+    "Colours": {
+      "blue": "Bleu",
+      "green": "Vert",
+      "yellow": "Jaune",
+      "orange": "Orange",
+      "red": "Rouge",
+      "purple": "Violet"
     },
     "Celebration": {
       "title": "Cadrans",

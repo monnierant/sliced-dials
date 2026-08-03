@@ -43,7 +43,10 @@ function optionsFor(dial: any): Option[] {
       sign,
       category,
       label: ruleset?.categories[category]?.label ?? category,
-      color: ruleset?.categories[category]?.color ?? "#7a7a7a",
+      color:
+        ruleset?.mode === "counter" && dial.system.color
+          ? dial.system.color
+          : ruleset?.categories[category]?.color ?? "#7a7a7a",
       // The same predicate that refuses the write decides what is offered.
       verdict: canAddSlice(dial, {
         sign,

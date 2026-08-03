@@ -63,13 +63,21 @@
       <select name="ruleset" {{#unless editable}}disabled{{/unless}}>
         <option value="">&mdash;</option>
         {{#each rulesets}}
-        <option value="{{id}}" {{#if selected}}selected{{/if}}>{{id}}</option>
+        <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
         {{/each}}
       </select>
     </div>
 
     {{#if missingRuleset}}
     <p class="notification warning">{{localize "SLICEDDIALS.Sheet.noRuleset"}}</p>
+    {{/if}}
+
+    {{#if counterMode}}
+    <div class="form-group">
+      <label>{{localize "SLICEDDIALS.Sheet.color"}}</label>
+      <input type="color" name="color" value="{{system.color}}"
+        {{#unless editable}}disabled{{/unless}} />
+    </div>
     {{/if}}
 
     <div class="form-group sd-sheet-signs">

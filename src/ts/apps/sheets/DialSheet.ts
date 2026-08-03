@@ -80,8 +80,10 @@ export default class DialSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
       })),
       rulesets: listRulesets().map((entry) => ({
         id: entry.id,
+        label: entry.label ?? entry.id,
         selected: entry.id === system.ruleset,
       })),
+      counterMode: ruleset?.mode === "counter",
       // Without a ruleset a dial accepts nothing, which is the single most
       // likely reason a freshly created dial appears inert.
       missingRuleset: !ruleset,
@@ -136,11 +138,14 @@ export default class DialSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
     const available = Object.keys(
       getRuleset(data.ruleset)?.categories ?? {}
     ).length;
+    const rulesetChanged = data.ruleset !== dial.system.ruleset;
 
     // Unticking the category a dial was to be closed with would leave it
     // unfinishable, so the requirement goes rather than the dial.
     const closing =
-      checked.length === 0 || checked.includes(data.closingCategory)
+      rulesetChanged
+        ? ""
+        : checked.length === 0 || checked.includes(data.closingCategory)
         ? (data.closingCategory ?? "")
         : "";
 
@@ -150,6 +155,7 @@ export default class DialSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
       "system.size": Number(data.size),
       "system.tone": data.tone ?? dial.system.tone,
       "system.ruleset": data.ruleset ?? "",
+      "system.color": data.color ?? dial.system.color,
       "system.onComplete": data.onComplete,
       "system.onCompleteState": data.onCompleteState ?? dial.system.onCompleteState,
       "system.celebration": data.celebration ?? dial.system.celebration,
@@ -158,7 +164,10 @@ export default class DialSheet extends HandlebarsApplicationMixin(ItemSheetV2) {
       "system.allowedSigns": SIGN_CHOICES[data.signChoice] ?? ["+", "-"],
       // All boxes ticked is stored as "no restriction", so adding a category to
       // the ruleset later does not silently exclude it from existing dials.
-      "system.allowedCategories": checked.length === available ? [] : checked,
+      // Categories are keys owned by a ruleset. Carrying keys from the old one
+      // into the new one would leave the picker full of invalid choices.
+      "system.allowedCategories":
+        rulesetChanged || checked.length === available ? [] : checked,
     });
 
     // The state moves ownership with it, which is `setState`'s job and not a
